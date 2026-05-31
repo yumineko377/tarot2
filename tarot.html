@@ -41,7 +41,7 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;background:ra
 .spread-item{padding:12px 16px;border-radius:14px;border:1.5px solid rgba(200,160,240,0.2);background:rgba(255,255,255,0.04);cursor:pointer;transition:all .2s;min-width:140px;text-align:center;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
 .spread-item:hover{background:rgba(160,120,220,0.2);border-color:rgba(200,160,240,0.5)}.spread-item .s-name{font-size:.85rem;color:#d8c8f0;font-weight:700;margin-bottom:4px}.spread-item .s-desc{font-size:.65rem;color:#8b6faf}
 /* P3 牌阵布局 */
-.spread-layout-wrap{width:100%;max-width:800px;display:flex;align-items:center;justify-content:center;padding:12px 0 55px}
+.spread-layout-wrap{width:100%;max-width:960px;display:flex;align-items:center;justify-content:center;padding:12px 0 70px}
 .spread-layout{position:relative;margin:0 auto}
 .spread-slot{position:absolute;display:flex;flex-direction:column;align-items:center}
 .slot-card{width:85px;height:145px;border-radius:10px;border:2px dashed rgba(200,160,240,0.25);background:rgba(255,255,255,0.04);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s;position:relative;overflow:hidden;z-index:1}
@@ -56,10 +56,10 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;background:ra
 .reveal-page{padding-top:12px;overflow-y:auto;overflow-x:hidden}
 .reveal-page h2{font-family:'Cinzel',serif;font-size:1.2rem;color:#d4bff0;letter-spacing:.08em;margin-bottom:2px}
 .rev-sub{font-size:.68rem;color:#6b4f8a;margin-bottom:8px}
-.spread-reveal-wrap{width:100%;max-width:800px;display:flex;align-items:center;justify-content:center;padding:8px 0;margin-bottom:4px}
+.spread-reveal-wrap{width:100%;max-width:960px;display:flex;align-items:center;justify-content:center;padding:8px 0 50px;margin:0 auto 4px}
 .spread-reveal-layout{position:relative;margin:0 auto}
 .rev-card-pos{position:absolute;display:flex;flex-direction:column;align-items:center;gap:4px}
-.rev-card-inner{width:110px;height:187px;position:relative;transition:transform .75s cubic-bezier(0.4,0,0.2,1);transform-style:preserve-3d;border-radius:14px;z-index:2}
+.rev-card-inner{width:100px;height:170px;position:relative;transition:transform .75s cubic-bezier(0.4,0,0.2,1);transform-style:preserve-3d;border-radius:14px;z-index:2}
 .rev-card-pos.flipped .rev-card-inner{transform:rotateY(180deg)}
 .rev-face{position:absolute;inset:0;backface-visibility:hidden;border-radius:14px;overflow:hidden}
 .rev-back{background:linear-gradient(135deg,#1a1040,#2a1850);border:2px solid rgba(200,160,240,0.25);display:flex;align-items:center;justify-content:center;box-shadow:0 8px 18px rgba(0,0,0,0.35)}
@@ -81,7 +81,7 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;background:ra
 .rev-label .rev-pos-tag{font-size:.6rem;margin-left:3px;padding:2px 6px;border-radius:99px}.rev-pos-tag.up{background:rgba(100,180,140,0.18);color:#6ab88a}.rev-pos-tag.rev{background:rgba(200,120,120,0.18);color:#c08080}
 .rev-card.reversed .rev-front img{transform:rotate(180deg)}
 /* 复制区 */
-.copy-box{text-align:center;margin:6px 0 16px;display:none;flex-direction:column;align-items:center;gap:8px}
+.copy-box{text-align:center;margin:56px 0 16px;display:none;flex-direction:column;align-items:center;gap:8px}
 .copy-box input{width:280px;max-width:90vw;padding:8px 14px;border-radius:10px;border:1.5px solid rgba(200,160,240,0.3);background:rgba(255,255,255,0.05);color:#d8c8f0;font-size:.82rem;font-family:inherit;text-align:center;transition:all .2s;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);outline:none}
 .copy-box input::placeholder{color:#6b4f8a}.copy-box input:focus{border-color:rgba(200,160,240,0.6);background:rgba(255,255,255,0.08)}
 .copy-box label{font-size:.7rem;color:#8b6faf;letter-spacing:.04em}
@@ -91,7 +91,7 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;background:ra
 @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(200,160,240,0.4)}50%{box-shadow:0 0 0 10px rgba(200,160,240,0)}}
 @media(max-width:600px){
   .card{width:88px;height:150px;margin-left:-12px}.card-num{font-size:.5rem;top:-18px;padding:0 4px}.hero h1{font-size:1.4rem}.meditation-hint{font-size:.58rem}.btn{padding:8px 20px;font-size:.75rem}.top-bar button,.top-bar .count{padding:6px 12px;font-size:.7rem}
-  .spread-layout-wrap,.spread-reveal-wrap{max-width:100vw;overflow:auto;-webkit-overflow-scrolling:touch;justify-content:flex-start;min-height:160px}
+  .spread-layout-wrap,.spread-reveal-wrap{max-width:100vw;overflow:auto;-webkit-overflow-scrolling:touch;justify-content:center;min-height:160px;margin:0 auto}
 }
 </style></head><body>
 <div class="app p0" id="app">
@@ -121,35 +121,35 @@ let A=[];M.forEach((c,i)=>A.push({en:c[0],zh:c[1],icon:c[2],up:c[3],rev:c[4]}));
 
 // 重新计算坐标——加大间距避免重叠。参数：卡片85×145，标签高度约35px在底部-46px处
 const SPREADS=[
-{id:"lover_cross",name:"恋人十字",cards:5,desc:"恋爱全貌——你、对方、现状、阻碍与未来",pos:[{t:"你自己",d:"你的状态与感受",x:150,y:230},{t:"对方",d:"对方的心理与看法",x:360,y:230},{t:"关系现状",d:"当下的能量局面",x:255,y:50},{t:"阻碍隐患",d:"潜藏的问题与障碍",x:255,y:410},{t:"未来走向",d:"3个月趋势",x:255,y:230}],w:520,h:540,
+{id:"lover_cross",name:"恋人十字",cards:5,desc:"恋爱全貌——你、对方、现状、阻碍与未来",pos:[{t:"你自己",d:"你的状态与感受",x:80,y:280},{t:"对方",d:"对方的心理与看法",x:370,y:280},{t:"关系现状",d:"当下的能量局面",x:225,y:40},{t:"阻碍隐患",d:"潜藏的问题与障碍",x:225,y:520},{t:"未来走向",d:"3个月趋势",x:225,y:280}],w:590,h:680,
  prompt:"请用恋人十字牌阵解读以下5张：\n牌1-你自己：{0}\n牌2-对方：{1}\n牌3-现状：{2}\n牌4-阻碍：{3}\n牌5-未来：{4}\n\n请基于十字结构给完整解读。"},
-{id:"venus",name:"维纳斯之镜",cards:8,desc:"深度爱情——8维度全面剖析",pos:[{t:"理想爱情",d:"你的深层渴望",x:30,y:30},{t:"吸引力",d:"当下激情",x:175,y:30},{t:"对方的感受",d:"对你的情感",x:320,y:30},{t:"外部环境",d:"外界影响",x:465,y:30},{t:"沟通问题",d:"没说出口的话",x:30,y:210},{t:"信任安全感",d:"信赖与不安",x:175,y:210},{t:"转折点",d:"未来关键事件",x:320,y:210},{t:"最终结局",d:"终极方向",x:465,y:210}],w:580,h:340,
+{id:"venus",name:"维纳斯之镜",cards:8,desc:"深度爱情——8维度全面剖析",pos:[{t:"理想爱情",d:"你的深层渴望",x:30,y:30},{t:"吸引力",d:"当下激情",x:175,y:30},{t:"对方的感受",d:"对你的情感",x:320,y:30},{t:"外部环境",d:"外界影响",x:465,y:30},{t:"沟通问题",d:"没说出口的话",x:30,y:230},{t:"信任安全感",d:"信赖与不安",x:175,y:230},{t:"转折点",d:"未来关键事件",x:320,y:230},{t:"最终结局",d:"终极方向",x:465,y:230}],w:600,h:370,
  prompt:"请用维纳斯之镜牌阵解读8张：\n牌1理想：{0}\n牌2吸引：{1}\n牌3对方：{2}\n牌4环境：{3}\n牌5沟通：{4}\n牌6信任：{5}\n牌7转折：{6}\n牌8结局：{7}\n\n请给完整解读。"},
-{id:"ex_review",name:"前任回溯",cards:5,desc:"释怀过去——原因、看法、成长",pos:[{t:"分开原因",d:"本质裂痕",x:20,y:140},{t:"对方看法",d:"现在怎么看你",x:150,y:140},{t:"你的成长",d:"学到的教训",x:280,y:140},{t:"是否释怀",d:"愈合状态",x:410,y:140},{t:"未来建议",d:"新的人生阶段",x:540,y:140}],w:630,h:260,
+{id:"ex_review",name:"前任回溯",cards:5,desc:"释怀过去——原因、看法、成长",pos:[{t:"分开原因",d:"本质裂痕",x:20,y:140},{t:"对方看法",d:"现在怎么看你",x:140,y:140},{t:"你的成长",d:"学到的教训",x:260,y:140},{t:"是否释怀",d:"愈合状态",x:380,y:140},{t:"未来建议",d:"新的人生阶段",x:500,y:140}],w:620,h:260,
  prompt:"请用前任回溯牌阵解读5张：\n牌1原因：{0}\n牌2对方：{1}\n牌3成长：{2}\n牌4释怀：{3}\n牌5建议：{4}\n\n请给完整解读。"},
-{id:"reunion",name:"复合之路",cards:6,desc:"能不能复合——状态、意愿、阻碍",pos:[{t:"对方感情状态",d:"是否有新欢",x:30,y:30},{t:"对方想复合吗",d:"真实意愿",x:210,y:30},{t:"阻碍因素",d:"现实中的障碍",x:390,y:30},{t:"有利因素",d:"你们的优势",x:30,y:210},{t:"你需要做的",d:"该怎么行动",x:210,y:210},{t:"复合后未来",d:"复合后会怎样",x:390,y:210}],w:520,h:340,
+{id:"reunion",name:"复合之路",cards:6,desc:"能不能复合——状态、意愿、阻碍",pos:[{t:"对方感情状态",d:"是否有新欢",x:30,y:30},{t:"对方想复合吗",d:"真实意愿",x:210,y:30},{t:"阻碍因素",d:"现实中的障碍",x:390,y:30},{t:"有利因素",d:"你们的优势",x:30,y:230},{t:"你需要做的",d:"该怎么行动",x:210,y:230},{t:"复合后未来",d:"复合后会怎样",x:390,y:230}],w:540,h:370,
  prompt:"请用复合之路牌阵解读6张：\n牌1状态：{0}\n牌2意愿：{1}\n牌3阻碍：{2}\n牌4优势：{3}\n牌5行动：{4}\n牌6未来：{5}\n\n请给完整解读。"},
 {id:"truth_eye",name:"真相之眼",cards:4,desc:"对方内心所想——表面vs内心",pos:[{t:"表面表现",d:"公开场合的行为",x:80,y:50},{t:"内心真实",d:"私下真实想法",x:370,y:50},{t:"隐藏情绪",d:"不愿表达的感受",x:80,y:240},{t:"下一步行动",d:"近期会做的事",x:370,y:240}],w:510,h:370,
  prompt:"请用真相之眼牌阵解读4张：\n牌1表面：{0}\n牌2内心：{1}\n牌3隐藏：{2}\n牌4行动：{3}\n\n请给完整解读。"},
-{id:"career",name:"事业之梯",cards:5,desc:"职场发展——基础、挑战、优势",pos:[{t:"事业基础",d:"当前岗位资源",x:230,y:380},{t:"面临的挑战",d:"职场中的困难",x:50,y:230},{t:"隐藏优势",d:"未利用的能力",x:230,y:120},{t:"近期机会",d:"1-3个月转机",x:50,y:50},{t:"巅峰方向",d:"长期职业路径",x:400,y:50}],w:510,h:510,
+{id:"career",name:"事业之梯",cards:5,desc:"职场发展——基础、挑战、优势",pos:[{t:"事业基础",d:"当前岗位资源",x:230,y:540},{t:"面临的挑战",d:"职场中的困难",x:50,y:340},{t:"隐藏优势",d:"未利用的能力",x:230,y:180},{t:"近期机会",d:"1-3个月转机",x:50,y:40},{t:"巅峰方向",d:"长期职业路径",x:400,y:40}],w:540,h:680,
  prompt:"请用事业之梯牌阵解读5张：\n牌1基础：{0}\n牌2挑战：{1}\n牌3优势：{2}\n牌4机会：{3}\n牌5方向：{4}\n\n请给完整解读。"},
 {id:"study",name:"学业明灯",cards:4,desc:"学习考试——状态、障碍、方法",pos:[{t:"学习状态",d:"专注度与心态",x:40,y:140},{t:"学习障碍",d:"分心因素",x:200,y:140},{t:"学习方法",d:"最优策略",x:360,y:140},{t:"考试结果",d:"最终成绩",x:520,y:140}],w:600,h:260,
  prompt:"请用学业明灯牌阵解读4张：\n牌1状态：{0}\n牌2障碍：{1}\n牌3方法：{2}\n牌4结果：{3}\n\n请给完整解读。"},
-{id:"flirt",name:"暧昧解码",cards:5,desc:"暧昧期判断——该主动还是抽身",pos:[{t:"你的位置",d:"是否特别的那个",x:245,y:20},{t:"甜蜜面",d:"给你的快乐",x:30,y:170},{t:"危险面",d:"患得患失的风险",x:460,y:170},{t:"是否愿推进",d:"想不想确认关系",x:245,y:320},{t:"最佳行动",d:"主动等待还是抽身",x:245,y:210}],w:580,h:440,
+{id:"flirt",name:"暧昧解码",cards:5,desc:"暧昧期判断——该主动还是抽身",pos:[{t:"你的位置",d:"是否特别的那个",x:245,y:40},{t:"甜蜜面",d:"给你的快乐",x:40,y:280},{t:"危险面",d:"患得患失的风险",x:450,y:280},{t:"是否愿推进",d:"想不想确认关系",x:245,y:520},{t:"最佳行动",d:"主动等待还是抽身",x:245,y:280}],w:580,h:680,
  prompt:"请用暧昧解码牌阵解读5张：\n牌1位置：{0}\n牌2甜蜜：{1}\n牌3危险：{2}\n牌4推进：{3}\n牌5行动：{4}\n\n请给完整解读。"},
-{id:"friendship",name:"友谊桥梁",cards:4,desc:"朋友关系——基础、现状、未来",pos:[{t:"友谊基础",d:"为何成为朋友",x:40,y:140},{t:"友谊现状",d:"现在的亲密程度",x:200,y:140},{t:"潜在裂痕",d:"可能的问题",x:360,y:140},{t:"友谊未来",d:"会走向何方",x:520,y:140}],w:600,h:260,
+{id:"friendship",name:"友谊桥梁",cards:4,desc:"朋友关系——基础、现状、未来",pos:[{t:"友谊基础",d:"为何成为朋友",x:30,y:140},{t:"友谊现状",d:"现在的亲密程度",x:190,y:140},{t:"潜在裂痕",d:"可能的问题",x:350,y:140},{t:"友谊未来",d:"会走向何方",x:510,y:140}],w:640,h:260,
  prompt:"请用友谊桥梁牌阵解读4张：\n牌1基础：{0}\n牌2现状：{1}\n牌3裂痕：{2}\n牌4未来：{3}\n\n请给完整解读。"},
-{id:"triangle",name:"三角迷局",cards:7,desc:"三人关系——感情、倾向、结局",pos:[{t:"你的感情",d:"真实心意",x:235,y:20},{t:"他对你",d:"他对你的态度",x:30,y:150},{t:"第三方",d:"另一人身份",x:440,y:150},{t:"第三方吸引",d:"对他的吸引力",x:100,y:290},{t:"他的倾向",d:"真实选择",x:370,y:290},{t:"你的优势",d:"你的筹码",x:30,y:50},{t:"最终结局",d:"三人关系走向",x:440,y:50}],w:560,h:420,
+{id:"triangle",name:"三角迷局",cards:7,desc:"三人关系——感情、倾向、结局",pos:[{t:"你的感情",d:"真实心意",x:260,y:20},{t:"他对你",d:"他对你的态度",x:30,y:220},{t:"第三方",d:"另一人身份",x:460,y:220},{t:"第三方吸引",d:"对他的吸引力",x:80,y:430},{t:"他的倾向",d:"真实选择",x:410,y:430},{t:"你的优势",d:"你的筹码",x:20,y:20},{t:"最终结局",d:"三人关系走向",x:500,y:20}],w:640,h:620,
  prompt:"请用三角迷局牌阵解读7张：\n牌1你的感情：{0}\n牌2他对你：{1}\n牌3第三方：{2}\n牌4第三方吸引：{3}\n牌5他的倾向：{4}\n牌6你的优势：{5}\n牌7结局：{6}\n\n请给完整解读。"},
 {id:"wheel",name:"命运之轮",cards:3,desc:"日常运势——当下、转折、建议",pos:[{t:"当下状态",d:"目前的能量处境",x:60,y:140},{t:"关键转折",d:"即将发生的变化",x:260,y:140},{t:"结果建议",d:"趋势与行动建议",x:460,y:140}],w:580,h:260,
  prompt:"请用命运之轮牌阵解读3张：\n牌1当下：{0}\n牌2转折：{1}\n牌3建议：{2}\n\n请给完整解读。"},
-{id:"shadow",name:"心灵暗影",cards:3,desc:"自我探索——表面、阴影、光芒",pos:[{t:"表面人格",d:"在他人眼中的你",x:60,y:30},{t:"内心阴影",d:"不愿面对的恐惧",x:60,y:200},{t:"内在光芒",d:"未发现的力量天赋",x:60,y:370}],w:220,h:500,
+{id:"shadow",name:"心灵暗影",cards:3,desc:"自我探索——表面、阴影、光芒",pos:[{t:"表面人格",d:"在他人眼中的你",x:60,y:30},{t:"内心阴影",d:"不愿面对的恐惧",x:60,y:250},{t:"内在光芒",d:"未发现的力量天赋",x:60,y:470}],w:220,h:600,
  prompt:"请用心灵暗影牌阵解读3张：\n牌1表面：{0}\n牌2阴影：{1}\n牌3光芒：{2}\n\n请给完整解读。"},
 {id:"choice",name:"二择一",cards:3,desc:"两个选项——选A还是B？",pos:[{t:"选项A走向",d:"选第一选项会怎样",x:40,y:140},{t:"选项B走向",d:"选第二选项会怎样",x:430,y:140},{t:"关键因素",d:"影响决定的隐藏信息",x:235,y:20}],w:550,h:270,
  prompt:"请用二择一牌阵解读3张：\n牌1选项A：{0}\n牌2选项B：{1}\n牌3关键：{2}\n\n请给完整解读。"},
-{id:"season",name:"四季运势",cards:4,desc:"未来三月——每月能量与趋势",pos:[{t:"第一个月",d:"接下来4周",x:70,y:50},{t:"第二个月",d:"5-8周后",x:350,y:50},{t:"第三个月",d:"9-12周后",x:70,y:240},{t:"整体趋势",d:"三个月的主线",x:350,y:240}],w:510,h:370,
+{id:"season",name:"四季运势",cards:4,desc:"未来三月——每月能量与趋势",pos:[{t:"第一个月",d:"接下来4周",x:70,y:50},{t:"第二个月",d:"5-8周后",x:350,y:50},{t:"第三个月",d:"9-12周后",x:70,y:330},{t:"整体趋势",d:"三个月的主线",x:350,y:330}],w:510,h:480,
  prompt:"请用四季运势牌阵解读4张：\n牌1第一个月：{0}\n牌2第二个月：{1}\n牌3第三个月：{2}\n牌4趋势：{3}\n\n请给完整解读。"},
-{id:"past_life",name:"前世今生",cards:6,desc:"业力因果——前世、课题、使命",pos:[{t:"前世身份",d:"前世的角色地位",x:30,y:30},{t:"未完成课题",d:"遗留的业力",x:210,y:30},{t:"前世相关之人",d:"今生重遇的关系",x:390,y:30},{t:"今生天赋",d:"前世积累的优势",x:30,y:210},{t:"需克服业力",d:"突破的循环",x:210,y:210},{t:"灵魂使命",d:"此生最重要的功课",x:390,y:210}],w:510,h:340,
+{id:"past_life",name:"前世今生",cards:6,desc:"业力因果——前世、课题、使命",pos:[{t:"前世身份",d:"前世的角色地位",x:30,y:30},{t:"未完成课题",d:"遗留的业力",x:210,y:30},{t:"前世相关之人",d:"今生重遇的关系",x:390,y:30},{t:"今生天赋",d:"前世积累的优势",x:30,y:280},{t:"需克服业力",d:"突破的循环",x:210,y:280},{t:"灵魂使命",d:"此生最重要的功课",x:390,y:280}],w:510,h:440,
  prompt:"请用前世今生牌阵解读6张：\n牌1身份：{0}\n牌2课题：{1}\n牌3关系：{2}\n牌4天赋：{3}\n牌5业力：{4}\n牌6使命：{5}\n\n请给完整解读。"}
 ];
 
@@ -186,7 +186,7 @@ const sw2=bid('spreadTableWrap');if(sw2)sw2.addEventListener('wheel',function(e)
 function shiftSpreadTable(d){let w=bid('spreadTableWrap');if(w)w.scrollBy({left:d,behavior:'smooth'})}
 
 // === P4 牌阵翻牌 ===
-function goSpreadReveal(){if(!spreadSlots.every(s=>s)){bid('spreadHint').textContent='请先填满所有牌位！';return}let s=SPREADS[spreadIdx],l=bid('spreadRevealLayout'),sc=1.45;l.style.width=(s.w*sc)+'px';l.style.height=(s.h*sc+50)+'px';l.innerHTML='';bid('spreadRevealTitle').textContent=s.name;bid('spreadRevealSub').textContent=s.cards+' 张牌 · 点击牌背逐一翻开';let bp=[];bp.push('请用'+s.name+'牌阵解读以下'+s.cards+'张塔罗牌：\n');spreadSlots.forEach((c,i)=>{let el=document.createElement('div');el.className='rev-card-pos'+(c.reversed?' reversed':'');el.style.left=(s.pos[i].x*sc)+'px';el.style.top=(s.pos[i].y*sc)+'px';let isrc='PaiMian/'+c.en.replace(/ /g,'_')+'.png';el.innerHTML='<div class="rev-card-inner"><div class="rev-face rev-back"><img src="card_back.png" alt=""></div><div class="rev-face rev-front"><img src="'+isrc+'" alt="'+c.zh+'" loading="lazy" onerror="this.parentElement.innerHTML=\'<div class=\\\'r-icon\\\'>'+c.icon+'</div><div class=\\\'r-en\\\'>'+c.en+'</div>\';this.parentElement.style.background=\'linear-gradient(180deg,#faf5ef,#f0e8d8)\'"></div></div><div class="rev-pos-label"><span class="rp-title">'+s.pos[i].t+'</span><span class="rp-desc">'+s.pos[i].d+'</span><span class="rp-card">'+c.icon+' '+c.zh+'<span class="rev-pos-tag '+(c.reversed?'rp-rev':'rp-up')+'">'+(c.reversed?'逆位':'正位')+'</span></span></div>';bp.push(s.pos[i].t+'（牌'+(i+1)+'）：'+c.zh+'（'+c.en+'）—— '+(c.reversed?'逆位':'正位')+'，关键词：'+(c.reversed?c.rev:c.up));l.appendChild(el);el.addEventListener('click',function(){if(el.classList.contains('flipped'))return;el.classList.add('flipped');let f=document.querySelectorAll('#spreadRevealLayout .rev-card-pos.flipped').length;bid('spreadRevealSub').textContent='已翻开 '+f+'/'+spreadSlots.length+' 张';if(f===spreadSlots.length){bid('spreadRevealSub').textContent='✦ 全部揭开 ✦';bid('spreadCopyBox').style.display='flex'}})});bp.push('\n请基于'+s.name+'牌阵的结构，给出每张牌在其位置上的详细解读以及整体关联分析。');bid('spreadCopyBtn').dataset.fullPrompt=bp.join('\n');bid('spreadCopyBox').style.display='none';goPage(4)}
+function goSpreadReveal(){if(!spreadSlots.every(s=>s)){bid('spreadHint').textContent='请先填满所有牌位！';return}let s=SPREADS[spreadIdx],l=bid('spreadRevealLayout'),sc=1.0;l.style.width=(s.w*sc)+'px';l.style.height=(s.h*sc+50)+'px';l.innerHTML='';bid('spreadRevealTitle').textContent=s.name;bid('spreadRevealSub').textContent=s.cards+' 张牌 · 点击牌背逐一翻开';let bp=[];bp.push('请用'+s.name+'牌阵解读以下'+s.cards+'张塔罗牌：\n');spreadSlots.forEach((c,i)=>{let el=document.createElement('div');el.className='rev-card-pos'+(c.reversed?' reversed':'');el.style.left=(s.pos[i].x*sc)+'px';el.style.top=(s.pos[i].y*sc)+'px';let isrc='PaiMian/'+c.en.replace(/ /g,'_')+'.png';el.innerHTML='<div class="rev-card-inner"><div class="rev-face rev-back"><img src="card_back.png" alt=""></div><div class="rev-face rev-front"><img src="'+isrc+'" alt="'+c.zh+'" loading="lazy" onerror="this.parentElement.innerHTML=\'<div class=\\\'r-icon\\\'>'+c.icon+'</div><div class=\\\'r-en\\\'>'+c.en+'</div>\';this.parentElement.style.background=\'linear-gradient(180deg,#faf5ef,#f0e8d8)\'"></div></div><div class="rev-pos-label"><span class="rp-title">'+s.pos[i].t+'</span><span class="rp-desc">'+s.pos[i].d+'</span><span class="rp-card">'+c.icon+' '+c.zh+'<span class="rev-pos-tag '+(c.reversed?'rp-rev':'rp-up')+'">'+(c.reversed?'逆位':'正位')+'</span></span></div>';bp.push(s.pos[i].t+'（牌'+(i+1)+'）：'+c.zh+'（'+c.en+'）—— '+(c.reversed?'逆位':'正位')+'，关键词：'+(c.reversed?c.rev:c.up));l.appendChild(el);el.addEventListener('click',function(){if(el.classList.contains('flipped'))return;el.classList.add('flipped');let f=document.querySelectorAll('#spreadRevealLayout .rev-card-pos.flipped').length;bid('spreadRevealSub').textContent='已翻开 '+f+'/'+spreadSlots.length+' 张';if(f===spreadSlots.length){bid('spreadRevealSub').textContent='✦ 全部揭开 ✦';bid('spreadCopyBox').style.display='flex'}})});bp.push('\n请基于'+s.name+'牌阵的结构，给出每张牌在其位置上的详细解读以及整体关联分析。');bid('spreadCopyBtn').dataset.fullPrompt=bp.join('\n');bid('spreadCopyBox').style.display='none';goPage(4)}
 function copySpreadResult(){let t=bid('spreadCopyBtn').dataset.fullPrompt;if(!t)return;navigator.clipboard.writeText(t).then(function(){let b=bid('spreadCopyBtn');b.textContent='✅ 已复制！';b.classList.add('copied');setTimeout(function(){b.textContent='📋 复制解牌提示词';b.classList.remove('copied')},2500)})}
 buildDeck();renderTable();buildSpreadDeck();renderSpreadTable();
 </script></body></html>
