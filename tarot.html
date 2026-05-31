@@ -1,0 +1,192 @@
+<!DOCTYPE html><html lang="zh"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>Tarot | LD</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700&family=Cinzel:wght@400;600;700&display=swap');
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{min-height:100vh;overflow:hidden;background:radial-gradient(ellipse at 50% 0%,#1a1030 0%,#0a0618 55%);color:#e0d8ec;font-family:'Noto Serif SC',serif}
+body::before{content:'';position:fixed;inset:0;pointer-events:none;background:radial-gradient(circle at 30% 20%,rgba(180,140,220,0.04) 0%,transparent 50%),radial-gradient(circle at 70% 80%,rgba(140,100,200,0.03) 0%,transparent 50%)}
+.app{display:flex;width:500vw;height:100vh;transition:transform 0.7s cubic-bezier(0.4,0,0.2,1)}
+.app.p0{transform:translateX(0)}.app.p1{transform:translateX(-100vw)}.app.p2{transform:translateX(-200vw)}.app.p3{transform:translateX(-300vw)}.app.p4{transform:translateX(-400vw)}
+.page{width:100vw;height:100vh;flex-shrink:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:16px;overflow-y:auto;overflow-x:hidden}
+.hero{text-align:center;margin-bottom:4px}
+.hero h1{font-family:'Cinzel',serif;font-size:1.7rem;font-weight:700;background:linear-gradient(135deg,#d4bff0,#c4a0e8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:.08em}
+.hero .sub{font-size:.7rem;color:#8b6faf;letter-spacing:.1em}.hero .by{font-size:.6rem;color:#5a3f8a;margin-top:2px}
+.top-bar{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;align-items:center;margin-bottom:6px}
+.top-bar button,.top-bar .count{padding:7px 16px;border-radius:99px;border:1.5px solid rgba(180,140,220,0.3);background:rgba(255,255,255,0.04);color:#c8b8e0;font-size:.78rem;font-family:inherit;cursor:pointer;transition:all .2s;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.top-bar button:hover,.top-bar button.active{background:rgba(160,120,220,0.2);border-color:rgba(200,160,240,0.5);color:#f0e4ff}
+.top-bar .count{background:rgba(160,120,220,0.12);border-color:rgba(200,160,240,0.25);cursor:default}
+.table-area{width:100%;max-width:940px;position:relative;overflow-x:hidden;overflow-y:visible;padding-top:10px}
+.spread-table-area{width:100%;max-width:940px;position:relative;overflow-x:hidden;overflow-y:visible;padding-top:12px;margin-top:8px}
+.table-wrap{width:100%;padding:4px 0 0;overflow-x:auto;overflow-y:visible;-webkit-overflow-scrolling:touch;scroll-behavior:smooth;cursor:grab}
+.table-wrap::-webkit-scrollbar{height:4px}.table-wrap::-webkit-scrollbar-thumb{background:rgba(200,160,240,0.2);border-radius:2px}.table-wrap::-webkit-scrollbar-track{background:transparent}
+.arrow{position:absolute;top:50%;transform:translateY(-50%);z-index:10;width:32px;height:32px;border-radius:50%;background:rgba(20,10,40,0.85);border:1.5px solid rgba(200,160,240,0.3);color:#c8b8e0;font-size:.9rem;cursor:pointer;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);transition:all .2s;opacity:.75}
+.arrow:hover{opacity:1;border-color:rgba(200,160,240,0.6)}.arrow-left{left:2px}.arrow-right{right:2px}
+.table{display:flex;gap:0;align-items:center;padding:10px 36px 0;min-width:max-content}
+.card{width:110px;height:187px;flex-shrink:0;position:relative;margin-left:-16px;cursor:pointer;transition:transform .35s cubic-bezier(0.34,1.56,0.64,1)}
+.card-num{position:absolute;top:-22px;left:50%;transform:translateX(-50%);font-size:.6rem;color:#8b6faf;letter-spacing:.04em;font-weight:600;background:rgba(15,8,30,0.8);padding:1px 6px;border-radius:99px;border:1px solid rgba(180,140,220,0.15);z-index:3;pointer-events:none}
+.card:first-child{margin-left:0}.card.selected{transform:translateY(-22px) scale(1.08);z-index:10}
+.card.selected .card-inner{box-shadow:0 0 24px rgba(200,160,240,0.5),0 0 50px rgba(160,120,220,0.2)}
+.card.used{opacity:.35;pointer-events:none;transform:rotate(0)!important}.card.used .card-back{border-color:rgba(255,255,255,0.05)}
+.card-inner{position:relative;width:100%;height:100%;border-radius:10px;overflow:hidden;box-shadow:0 4px 14px rgba(0,0,0,0.35)}
+.card-back{width:100%;height:100%;background:linear-gradient(135deg,#1a1040,#2a1850);border:2px solid rgba(200,160,240,0.2);display:flex;align-items:center;justify-content:center;border-radius:10px}
+.card-back img{width:100%;height:100%;object-fit:cover;border-radius:8px}.card-back .star{font-size:1.8rem;color:rgba(220,200,255,0.5)}
+.select-ring{position:absolute;inset:-3px;border-radius:12px;border:2.5px solid transparent;transition:border-color .3s;pointer-events:none;z-index:2}.card.selected .select-ring{border-color:rgba(200,160,240,0.55)}
+.hint{font-size:.72rem;color:#6b4f8a;text-align:center;min-height:20px;margin:6px 0 4px}
+.meditation-hint{font-size:.78rem;color:#c8b0e8;text-align:center;margin-bottom:12px;letter-spacing:.03em;opacity:.9}
+.bottom-bar{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;padding-top:10px}
+.btn{padding:10px 26px;border-radius:10px;border:1.5px solid rgba(200,160,240,0.25);background:rgba(255,255,255,0.05);color:#d8c8f0;font-size:.82rem;font-family:inherit;cursor:pointer;transition:all .2s;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.btn:hover{background:rgba(160,120,220,0.2);border-color:rgba(200,160,240,0.5)}.btn.accent{background:rgba(160,120,220,0.22);border-color:rgba(180,140,240,0.4);color:#e8dcf8}.btn.accent:hover{background:rgba(160,120,220,0.38)}
+.back-btn{padding:8px 22px;border-radius:8px;border:1.5px solid rgba(200,160,240,0.2);background:rgba(255,255,255,0.04);color:#8b6faf;font-size:.75rem;font-family:inherit;cursor:pointer;transition:all .2s;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);margin:8px}
+.back-btn:hover{background:rgba(160,120,220,0.15);border-color:rgba(200,160,240,0.4);color:#c8b8e0}
+.spread-list{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;max-width:900px;padding:8px 16px}
+.spread-item{padding:12px 16px;border-radius:14px;border:1.5px solid rgba(200,160,240,0.2);background:rgba(255,255,255,0.04);cursor:pointer;transition:all .2s;min-width:140px;text-align:center;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.spread-item:hover{background:rgba(160,120,220,0.2);border-color:rgba(200,160,240,0.5)}.spread-item .s-name{font-size:.85rem;color:#d8c8f0;font-weight:700;margin-bottom:4px}.spread-item .s-desc{font-size:.65rem;color:#8b6faf}
+/* P3 牌阵布局 */
+.spread-layout-wrap{width:100%;max-width:800px;display:flex;align-items:center;justify-content:center;padding:12px 0 55px}
+.spread-layout{position:relative;margin:0 auto}
+.spread-slot{position:absolute;display:flex;flex-direction:column;align-items:center}
+.slot-card{width:85px;height:145px;border-radius:10px;border:2px dashed rgba(200,160,240,0.25);background:rgba(255,255,255,0.04);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s;position:relative;overflow:hidden;z-index:1}
+.slot-card:hover{border-color:rgba(200,160,240,0.5);background:rgba(160,120,220,0.1)}
+.slot-card.filled{border-style:solid;border-color:rgba(200,160,240,0.35);box-shadow:0 0 14px rgba(160,120,220,0.2);background:#1a1040}
+.slot-card.filled img{width:100%;height:100%;object-fit:cover;border-radius:8px}
+.slot-card .slot-num{font-size:1rem;color:#6b4f8a;font-weight:700}
+.slot-label{position:absolute;bottom:-46px;left:50%;transform:translateX(-50%);width:130px;text-align:center;line-height:1.25;z-index:0}
+.slot-label .slot-title{color:#e8dcf8;font-weight:700;font-size:.58rem;display:block}
+.slot-label .slot-desc{color:#8b6faf;font-size:.5rem}
+/* P4 牌阵翻牌 */
+.reveal-page{padding-top:12px;overflow-y:auto;overflow-x:hidden}
+.reveal-page h2{font-family:'Cinzel',serif;font-size:1.2rem;color:#d4bff0;letter-spacing:.08em;margin-bottom:2px}
+.rev-sub{font-size:.68rem;color:#6b4f8a;margin-bottom:8px}
+.spread-reveal-wrap{width:100%;max-width:800px;display:flex;align-items:center;justify-content:center;padding:8px 0;margin-bottom:4px}
+.spread-reveal-layout{position:relative;margin:0 auto}
+.rev-card-pos{position:absolute;display:flex;flex-direction:column;align-items:center;gap:4px}
+.rev-card-inner{width:110px;height:187px;position:relative;transition:transform .75s cubic-bezier(0.4,0,0.2,1);transform-style:preserve-3d;border-radius:14px;z-index:2}
+.rev-card-pos.flipped .rev-card-inner{transform:rotateY(180deg)}
+.rev-face{position:absolute;inset:0;backface-visibility:hidden;border-radius:14px;overflow:hidden}
+.rev-back{background:linear-gradient(135deg,#1a1040,#2a1850);border:2px solid rgba(200,160,240,0.25);display:flex;align-items:center;justify-content:center;box-shadow:0 8px 18px rgba(0,0,0,0.35)}
+.rev-back img{width:100%;height:100%;object-fit:cover;border-radius:12px}.rev-back .star{font-size:1.8rem;color:rgba(220,200,255,0.5)}
+.rev-front{background:linear-gradient(180deg,#faf5ef,#f0e8d8);border:2px solid rgba(180,140,100,0.3);transform:rotateY(180deg);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px 6px;text-align:center;box-shadow:0 8px 18px rgba(0,0,0,0.35)}
+.rev-front img{width:100%;height:100%;object-fit:cover;border-radius:12px;position:absolute;inset:0}
+.rev-card-pos.use-image .rev-front{background:transparent;border:none}.rev-card-pos.reversed .rev-front img{transform:rotate(180deg)}
+.rev-pos-label{position:absolute;bottom:-50px;left:50%;transform:translateX(-50%);width:140px;text-align:center;line-height:1.25;z-index:0}
+.rev-pos-label .rp-title{color:#e8dcf8;font-weight:700;font-size:.62rem;display:block}
+.rev-pos-label .rp-desc{color:#8b6faf;font-size:.5rem;font-weight:400;display:block}
+.rev-pos-label .rp-card{font-size:.55rem;margin-top:2px;opacity:0;transition:opacity .35s;display:block}
+.rev-card-pos.flipped .rev-pos-label .rp-card{opacity:1}
+.rev-pos-tag{font-size:.55rem;padding:1px 5px;border-radius:99px;margin-left:3px}
+.rp-up{background:rgba(100,180,140,0.18);color:#6ab88a}.rp-rev{background:rgba(200,120,120,0.18);color:#c08080}
+/* 单抽 */
+.reveal-grid{display:flex;gap:22px;flex-wrap:wrap;justify-content:center;align-items:flex-start;max-width:960px;width:100%;padding:0 16px;margin-bottom:8px}
+.rev-card{display:flex;flex-direction:column;align-items:center;gap:6px;width:140px}
+.rev-label{text-align:center;font-size:.72rem;font-weight:700;color:#d8c8f0;margin-top:2px;opacity:0;transition:opacity .35s}.rev-card.flipped .rev-label{opacity:1}
+.rev-label .rev-pos-tag{font-size:.6rem;margin-left:3px;padding:2px 6px;border-radius:99px}.rev-pos-tag.up{background:rgba(100,180,140,0.18);color:#6ab88a}.rev-pos-tag.rev{background:rgba(200,120,120,0.18);color:#c08080}
+.rev-card.reversed .rev-front img{transform:rotate(180deg)}
+/* 复制区 */
+.copy-box{text-align:center;margin:6px 0 16px;display:none;flex-direction:column;align-items:center;gap:8px}
+.copy-box input{width:280px;max-width:90vw;padding:8px 14px;border-radius:10px;border:1.5px solid rgba(200,160,240,0.3);background:rgba(255,255,255,0.05);color:#d8c8f0;font-size:.82rem;font-family:inherit;text-align:center;transition:all .2s;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);outline:none}
+.copy-box input::placeholder{color:#6b4f8a}.copy-box input:focus{border-color:rgba(200,160,240,0.6);background:rgba(255,255,255,0.08)}
+.copy-box label{font-size:.7rem;color:#8b6faf;letter-spacing:.04em}
+.copy-btn{padding:10px 32px;border-radius:12px;border:1.5px solid rgba(100,200,160,0.3);background:rgba(40,120,80,0.12);color:#8ad8b0;font-size:.85rem;font-family:inherit;cursor:pointer;transition:all .3s;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.copy-btn:hover{background:rgba(60,160,100,0.22);border-color:rgba(100,200,160,0.55);color:#b0f0d0}
+.copy-btn.copied{background:rgba(60,160,100,0.28);color:#d0ffe8;border-color:rgba(100,200,160,0.6)}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(200,160,240,0.4)}50%{box-shadow:0 0 0 10px rgba(200,160,240,0)}}
+@media(max-width:600px){
+  .card{width:88px;height:150px;margin-left:-12px}.card-num{font-size:.5rem;top:-18px;padding:0 4px}.hero h1{font-size:1.4rem}.meditation-hint{font-size:.58rem}.btn{padding:8px 20px;font-size:.75rem}.top-bar button,.top-bar .count{padding:6px 12px;font-size:.7rem}
+  .spread-layout-wrap,.spread-reveal-wrap{max-width:100vw;overflow:auto;-webkit-overflow-scrolling:touch;justify-content:flex-start;min-height:160px}
+}
+</style></head><body>
+<div class="app p0" id="app">
+<div class="page" id="selectPage"><div class="hero"><h1>✦ Tarot ✦</h1><div class="sub">韦特系塔罗牌</div><div class="by">by LD</div></div>
+<div class="top-bar"><button class="active" data-n="1">抽1张</button><button data-n="3">抽3张</button><button data-n="5">抽5张</button><div class="count" id="count">已选 0 张</div></div>
+<div class="hint" id="hint">🃏 滑动牌桌 → 点击选牌 → 翻开</div>
+<div class="meditation-hint">✦ 抽牌时请静心默念心中所问，凭直觉选择与你共鸣的牌 ✦</div>
+<div class="table-area"><div class="arrow arrow-left" onclick="shiftTable(-250)">◀</div><div class="arrow arrow-right" onclick="shiftTable(250)">▶</div><div class="table-wrap" id="tableWrap"><div class="table" id="table"></div></div></div>
+<div class="bottom-bar"><button class="btn" onclick="shuffleDeck()">🔮 重新洗牌</button><button class="btn accent" onclick="goReveal()" id="revealBtn">✨ 翻开所选牌</button><button class="btn" onclick="goSpreads()">📐 牌阵</button></div></div>
+<div class="page reveal-page" id="revealPage"><h2>🔮 命运揭示</h2><div class="rev-sub" id="revSub"></div><div class="reveal-grid" id="revealGrid"></div><div class="copy-box" id="copyBox"><label>🔮 你想问什么？</label><input type="text" id="questionInput" placeholder="例如：近期的感情运势？"><button class="copy-btn" id="copyBtn" onclick="copyResult()">📋 复制提示词</button></div><button class="back-btn" onclick="goPage(0)">← 返回牌桌</button></div>
+<div class="page" style="justify-content:flex-start;padding-top:24px;overflow-y:auto"><div class="hero"><h1>📐 牌阵</h1><div class="sub">选择适合你问题的牌阵</div></div><div class="spread-list" id="spreadList"></div><button class="back-btn" onclick="goPage(0)">← 返回牌桌</button></div>
+<div class="page" style="justify-content:flex-start;padding-top:4px;overflow-y:auto"><div class="hero" style="margin-bottom:2px"><h1 style="font-size:1.1rem" id="spreadTitle">📐</h1><div class="sub" id="spreadDesc"></div></div>
+<div class="hint" id="spreadHint" style="margin-bottom:0">点击下方牌桌填充空位——已选过的牌变灰不可重复</div>
+<div class="spread-layout-wrap"><div class="spread-layout" id="spreadLayout"></div></div>
+<div class="spread-table-area"><div class="arrow arrow-left" onclick="shiftSpreadTable(-250)">◀</div><div class="arrow arrow-right" onclick="shiftSpreadTable(250)">▶</div><div class="table-wrap" id="spreadTableWrap"><div class="table" id="spreadTable"></div></div></div>
+<div class="bottom-bar" style="padding-top:2px;margin-top:-6px"><button class="btn" onclick="shuffleSpreadDeck()">🔮 重新洗牌</button><button class="btn accent" onclick="goSpreadReveal()" id="spreadRevealBtn">✨ 翻开牌阵</button><button class="btn" onclick="goPage(2)">← 换牌阵</button></div></div>
+<div class="page reveal-page" id="spreadRevealPage"><h2 id="spreadRevealTitle">🔮</h2><div class="rev-sub" id="spreadRevealSub"></div>
+<div class="spread-reveal-wrap"><div class="spread-reveal-layout" id="spreadRevealLayout"></div></div>
+<div class="copy-box" id="spreadCopyBox"><button class="copy-btn" id="spreadCopyBtn" onclick="copySpreadResult()">📋 复制解牌提示词</button></div>
+<button class="back-btn" onclick="goPage(3)">← 返回牌阵布局</button></div></div>
+
+<script>
+const M=[["The Fool","愚者","🌟","新的开始·冒险·天真","鲁莽·犹豫·错失良机"],["The Magician","魔术师","🪄","创造力·技能·意志力","欺骗·滥用能力·缺乏计划"],["The High Priestess","女祭司","🌙","直觉·神秘·潜意识","忽视直觉·秘密泄露·肤浅"],["The Empress","皇后","👑","丰饶·母性·感官享受","依赖·创造力枯竭·过度保护"],["The Emperor","皇帝","🏰","权威·稳定·领导力","专制·失控·缺乏纪律"],["The Hierophant","教皇","📿","传统·信仰·导师","反叛·打破常规·盲目追随"],["The Lovers","恋人","💕","爱情·和谐·选择","分离·背叛·价值观冲突"],["The Chariot","战车","⚔️","胜利·意志力·前进","失控·失败·方向迷失"],["Strength","力量","🦁","勇气·耐心·内在力量","软弱·自我怀疑·失控"],["The Hermit","隐者","🏮","内省·智慧·独处","孤立·逃避·固执"],["Wheel of Fortune","命运之轮","🎡","转折·机遇·命运","厄运·停滞·无法掌控"],["Justice","正义","⚖️","公正·真相·因果","不公·逃避责任·偏见"],["The Hanged Man","倒吊人","🪢","牺牲·换个角度·等待","拖延·无谓牺牲·固执"],["Death","死神","💀","结束·转变·重生","抗拒改变·停滞·恐惧"],["Temperance","节制","🌊","平衡·调和·耐心","极端·失衡·放纵"],["The Devil","恶魔","😈","欲望·束缚·执念","挣脱·觉醒·摆脱依赖"],["The Tower","高塔","🗼","崩塌·觉醒·剧变","逃避改变·勉强维持"],["The Star","星星","⭐","希望·治愈·灵感","绝望·失去信心·失落"],["The Moon","月亮","🌕","幻象·恐惧·潜意识","真相浮现·克服恐惧"],["The Sun","太阳","☀️","快乐·成功·活力","短暂快乐·过度乐观"],["Judgement","审判","📯","觉醒·重生·召唤","逃避审判·自我怀疑"],["The World","世界","🌍","完成·圆满·成就","未完成·停滞·缺失"]];
+const S=["Wands","Cups","Swords","Pentacles"],Z=["权杖","圣杯","宝剑","星币"],I=["🔥","💧","💨","🪙"];
+const R=["Ace","Two","Three","Four","Five","Six","Seven","Eight","Nine","Ten","Page","Knight","Queen","King"],Y=["王牌","二","三","四","五","六","七","八","九","十","侍从","骑士","王后","国王"];
+let A=[];M.forEach((c,i)=>A.push({en:c[0],zh:c[1],icon:c[2],up:c[3],rev:c[4]}));S.forEach((s,si)=>{R.forEach((r,ri)=>{A.push({en:r+" of "+s,zh:Z[si]+Y[ri],icon:I[si],up:Z[si]+"·"+Y[ri]+"·积极",rev:Y[ri]+"逆位·"+Z[si]+"·消极"});});});
+
+// 重新计算坐标——加大间距避免重叠。参数：卡片85×145，标签高度约35px在底部-46px处
+const SPREADS=[
+{id:"lover_cross",name:"恋人十字",cards:5,desc:"恋爱全貌——你、对方、现状、阻碍与未来",pos:[{t:"你自己",d:"你的状态与感受",x:150,y:230},{t:"对方",d:"对方的心理与看法",x:360,y:230},{t:"关系现状",d:"当下的能量局面",x:255,y:50},{t:"阻碍隐患",d:"潜藏的问题与障碍",x:255,y:410},{t:"未来走向",d:"3个月趋势",x:255,y:230}],w:520,h:540,
+ prompt:"请用恋人十字牌阵解读以下5张：\n牌1-你自己：{0}\n牌2-对方：{1}\n牌3-现状：{2}\n牌4-阻碍：{3}\n牌5-未来：{4}\n\n请基于十字结构给完整解读。"},
+{id:"venus",name:"维纳斯之镜",cards:8,desc:"深度爱情——8维度全面剖析",pos:[{t:"理想爱情",d:"你的深层渴望",x:30,y:30},{t:"吸引力",d:"当下激情",x:175,y:30},{t:"对方的感受",d:"对你的情感",x:320,y:30},{t:"外部环境",d:"外界影响",x:465,y:30},{t:"沟通问题",d:"没说出口的话",x:30,y:210},{t:"信任安全感",d:"信赖与不安",x:175,y:210},{t:"转折点",d:"未来关键事件",x:320,y:210},{t:"最终结局",d:"终极方向",x:465,y:210}],w:580,h:340,
+ prompt:"请用维纳斯之镜牌阵解读8张：\n牌1理想：{0}\n牌2吸引：{1}\n牌3对方：{2}\n牌4环境：{3}\n牌5沟通：{4}\n牌6信任：{5}\n牌7转折：{6}\n牌8结局：{7}\n\n请给完整解读。"},
+{id:"ex_review",name:"前任回溯",cards:5,desc:"释怀过去——原因、看法、成长",pos:[{t:"分开原因",d:"本质裂痕",x:20,y:140},{t:"对方看法",d:"现在怎么看你",x:150,y:140},{t:"你的成长",d:"学到的教训",x:280,y:140},{t:"是否释怀",d:"愈合状态",x:410,y:140},{t:"未来建议",d:"新的人生阶段",x:540,y:140}],w:630,h:260,
+ prompt:"请用前任回溯牌阵解读5张：\n牌1原因：{0}\n牌2对方：{1}\n牌3成长：{2}\n牌4释怀：{3}\n牌5建议：{4}\n\n请给完整解读。"},
+{id:"reunion",name:"复合之路",cards:6,desc:"能不能复合——状态、意愿、阻碍",pos:[{t:"对方感情状态",d:"是否有新欢",x:30,y:30},{t:"对方想复合吗",d:"真实意愿",x:210,y:30},{t:"阻碍因素",d:"现实中的障碍",x:390,y:30},{t:"有利因素",d:"你们的优势",x:30,y:210},{t:"你需要做的",d:"该怎么行动",x:210,y:210},{t:"复合后未来",d:"复合后会怎样",x:390,y:210}],w:520,h:340,
+ prompt:"请用复合之路牌阵解读6张：\n牌1状态：{0}\n牌2意愿：{1}\n牌3阻碍：{2}\n牌4优势：{3}\n牌5行动：{4}\n牌6未来：{5}\n\n请给完整解读。"},
+{id:"truth_eye",name:"真相之眼",cards:4,desc:"对方内心所想——表面vs内心",pos:[{t:"表面表现",d:"公开场合的行为",x:80,y:50},{t:"内心真实",d:"私下真实想法",x:370,y:50},{t:"隐藏情绪",d:"不愿表达的感受",x:80,y:240},{t:"下一步行动",d:"近期会做的事",x:370,y:240}],w:510,h:370,
+ prompt:"请用真相之眼牌阵解读4张：\n牌1表面：{0}\n牌2内心：{1}\n牌3隐藏：{2}\n牌4行动：{3}\n\n请给完整解读。"},
+{id:"career",name:"事业之梯",cards:5,desc:"职场发展——基础、挑战、优势",pos:[{t:"事业基础",d:"当前岗位资源",x:230,y:380},{t:"面临的挑战",d:"职场中的困难",x:50,y:230},{t:"隐藏优势",d:"未利用的能力",x:230,y:120},{t:"近期机会",d:"1-3个月转机",x:50,y:50},{t:"巅峰方向",d:"长期职业路径",x:400,y:50}],w:510,h:510,
+ prompt:"请用事业之梯牌阵解读5张：\n牌1基础：{0}\n牌2挑战：{1}\n牌3优势：{2}\n牌4机会：{3}\n牌5方向：{4}\n\n请给完整解读。"},
+{id:"study",name:"学业明灯",cards:4,desc:"学习考试——状态、障碍、方法",pos:[{t:"学习状态",d:"专注度与心态",x:40,y:140},{t:"学习障碍",d:"分心因素",x:200,y:140},{t:"学习方法",d:"最优策略",x:360,y:140},{t:"考试结果",d:"最终成绩",x:520,y:140}],w:600,h:260,
+ prompt:"请用学业明灯牌阵解读4张：\n牌1状态：{0}\n牌2障碍：{1}\n牌3方法：{2}\n牌4结果：{3}\n\n请给完整解读。"},
+{id:"flirt",name:"暧昧解码",cards:5,desc:"暧昧期判断——该主动还是抽身",pos:[{t:"你的位置",d:"是否特别的那个",x:245,y:20},{t:"甜蜜面",d:"给你的快乐",x:30,y:170},{t:"危险面",d:"患得患失的风险",x:460,y:170},{t:"是否愿推进",d:"想不想确认关系",x:245,y:320},{t:"最佳行动",d:"主动等待还是抽身",x:245,y:210}],w:580,h:440,
+ prompt:"请用暧昧解码牌阵解读5张：\n牌1位置：{0}\n牌2甜蜜：{1}\n牌3危险：{2}\n牌4推进：{3}\n牌5行动：{4}\n\n请给完整解读。"},
+{id:"friendship",name:"友谊桥梁",cards:4,desc:"朋友关系——基础、现状、未来",pos:[{t:"友谊基础",d:"为何成为朋友",x:40,y:140},{t:"友谊现状",d:"现在的亲密程度",x:200,y:140},{t:"潜在裂痕",d:"可能的问题",x:360,y:140},{t:"友谊未来",d:"会走向何方",x:520,y:140}],w:600,h:260,
+ prompt:"请用友谊桥梁牌阵解读4张：\n牌1基础：{0}\n牌2现状：{1}\n牌3裂痕：{2}\n牌4未来：{3}\n\n请给完整解读。"},
+{id:"triangle",name:"三角迷局",cards:7,desc:"三人关系——感情、倾向、结局",pos:[{t:"你的感情",d:"真实心意",x:235,y:20},{t:"他对你",d:"他对你的态度",x:30,y:150},{t:"第三方",d:"另一人身份",x:440,y:150},{t:"第三方吸引",d:"对他的吸引力",x:100,y:290},{t:"他的倾向",d:"真实选择",x:370,y:290},{t:"你的优势",d:"你的筹码",x:30,y:50},{t:"最终结局",d:"三人关系走向",x:440,y:50}],w:560,h:420,
+ prompt:"请用三角迷局牌阵解读7张：\n牌1你的感情：{0}\n牌2他对你：{1}\n牌3第三方：{2}\n牌4第三方吸引：{3}\n牌5他的倾向：{4}\n牌6你的优势：{5}\n牌7结局：{6}\n\n请给完整解读。"},
+{id:"wheel",name:"命运之轮",cards:3,desc:"日常运势——当下、转折、建议",pos:[{t:"当下状态",d:"目前的能量处境",x:60,y:140},{t:"关键转折",d:"即将发生的变化",x:260,y:140},{t:"结果建议",d:"趋势与行动建议",x:460,y:140}],w:580,h:260,
+ prompt:"请用命运之轮牌阵解读3张：\n牌1当下：{0}\n牌2转折：{1}\n牌3建议：{2}\n\n请给完整解读。"},
+{id:"shadow",name:"心灵暗影",cards:3,desc:"自我探索——表面、阴影、光芒",pos:[{t:"表面人格",d:"在他人眼中的你",x:60,y:30},{t:"内心阴影",d:"不愿面对的恐惧",x:60,y:200},{t:"内在光芒",d:"未发现的力量天赋",x:60,y:370}],w:220,h:500,
+ prompt:"请用心灵暗影牌阵解读3张：\n牌1表面：{0}\n牌2阴影：{1}\n牌3光芒：{2}\n\n请给完整解读。"},
+{id:"choice",name:"二择一",cards:3,desc:"两个选项——选A还是B？",pos:[{t:"选项A走向",d:"选第一选项会怎样",x:40,y:140},{t:"选项B走向",d:"选第二选项会怎样",x:430,y:140},{t:"关键因素",d:"影响决定的隐藏信息",x:235,y:20}],w:550,h:270,
+ prompt:"请用二择一牌阵解读3张：\n牌1选项A：{0}\n牌2选项B：{1}\n牌3关键：{2}\n\n请给完整解读。"},
+{id:"season",name:"四季运势",cards:4,desc:"未来三月——每月能量与趋势",pos:[{t:"第一个月",d:"接下来4周",x:70,y:50},{t:"第二个月",d:"5-8周后",x:350,y:50},{t:"第三个月",d:"9-12周后",x:70,y:240},{t:"整体趋势",d:"三个月的主线",x:350,y:240}],w:510,h:370,
+ prompt:"请用四季运势牌阵解读4张：\n牌1第一个月：{0}\n牌2第二个月：{1}\n牌3第三个月：{2}\n牌4趋势：{3}\n\n请给完整解读。"},
+{id:"past_life",name:"前世今生",cards:6,desc:"业力因果——前世、课题、使命",pos:[{t:"前世身份",d:"前世的角色地位",x:30,y:30},{t:"未完成课题",d:"遗留的业力",x:210,y:30},{t:"前世相关之人",d:"今生重遇的关系",x:390,y:30},{t:"今生天赋",d:"前世积累的优势",x:30,y:210},{t:"需克服业力",d:"突破的循环",x:210,y:210},{t:"灵魂使命",d:"此生最重要的功课",x:390,y:210}],w:510,h:340,
+ prompt:"请用前世今生牌阵解读6张：\n牌1身份：{0}\n牌2课题：{1}\n牌3关系：{2}\n牌4天赋：{3}\n牌5业力：{4}\n牌6使命：{5}\n\n请给完整解读。"}
+];
+
+let drawCount=1,selectedCards=new Set(),deck=[];
+let spreadDeck=[],spreadSlots=[],usedSpreadIndices=new Set(),spreadIdx=-1;
+
+function shuf(a){let x=[...a];for(let i=x.length-1;i>0;i--){let j=Math.floor(Math.random()*(i+1));[x[i],x[j]]=[x[j],x[i]]}return x}
+function goPage(n){bid('app').className='app p'+n;if(n===0){bid('revealBtn').style.animation='';bid('hint').textContent='🃏 滑动牌桌 → 点击选牌 → 翻开'}if(n===2)renderSpreadList()}
+function bid(id){return document.getElementById(id)}
+// === P0 ===
+function buildDeck(){deck=shuf(A).map(c=>({...c,reversed:Math.random()<.5}));selectedCards.clear();updateCount();bid('hint').textContent='🃏 滑动牌桌 → 点击选牌 → 翻开'}
+function renderTable(){let t=bid('table');t.innerHTML='';deck.forEach((c,i)=>{let d=document.createElement('div');d.className='card';d.style.transform='rotate('+((Math.random()-.5)*5)+'deg)';d.innerHTML='<div class="card-num">'+(i+1)+'</div><div class="select-ring"></div><div class="card-inner"><div class="card-back"><img src="card_back.png" alt="" onerror="this.style.display=\'none\';this.parentElement.querySelector(\'.star\').style.display=\'block\'"><div class="star" style="display:none">✦</div></div></div>';d.addEventListener('click',function(e){e.stopPropagation();toggleCard(i,d)});t.appendChild(d)});bid('tableWrap').scrollLeft=0}
+function toggleCard(i,el){if(selectedCards.has(i)){selectedCards.delete(i);el.classList.remove('selected')}else{if(selectedCards.size>=drawCount){let f=selectedCards.values().next().value;selectedCards.delete(f);document.querySelectorAll('#table .card')[f].classList.remove('selected')}selectedCards.add(i);el.classList.add('selected')}updateCount();let h=bid('hint'),btn=bid('revealBtn');if(selectedCards.size===drawCount){h.textContent='✨ 已选满，点击翻开';btn.style.animation='pulse 1.5s infinite'}else{h.textContent='🃏 已选 '+selectedCards.size+'/'+drawCount+' 张';btn.style.animation=''}}
+function updateCount(){bid('count').textContent='已选 '+selectedCards.size+'/'+drawCount+' 张'}
+function shuffleDeck(){buildDeck();renderTable();updateCount();bid('revealBtn').style.animation=''}
+const wrap=bid('tableWrap');wrap.addEventListener('wheel',function(e){e.preventDefault();wrap.scrollBy({left:e.deltaY||e.deltaX,behavior:'smooth'})},{passive:false});
+function shiftTable(d){bid('tableWrap').scrollBy({left:d,behavior:'smooth'})}
+document.querySelectorAll('#selectPage .top-bar button[data-n]').forEach(b=>{b.addEventListener('click',function(){document.querySelectorAll('#selectPage .top-bar button[data-n]').forEach(x=>x.classList.remove('active'));this.classList.add('active');drawCount=parseInt(this.dataset.n);shuffleDeck()})});
+function goReveal(){if(selectedCards.size===0){bid('hint').textContent='请先选牌！';return}let grid=bid('revealGrid');grid.innerHTML='';let arr=Array.from(selectedCards).sort((a,b)=>a-b),cards=arr.map(i=>deck[i]);let bp=[];bp.push('请帮我解读以下塔罗牌：\n');cards.forEach((c,i)=>{let el=document.createElement('div');el.className='rev-card'+(c.reversed?' reversed':'');let isrc='PaiMian/'+c.en.replace(/ /g,'_')+'.png';el.innerHTML='<div class="rev-card-inner"><div class="rev-face rev-back"><img src="card_back.png" alt=""></div><div class="rev-face rev-front"><img src="'+isrc+'" alt="'+c.zh+'" loading="lazy" onerror="this.parentElement.innerHTML=\'<div class=\\\'r-icon\\\'>'+c.icon+'</div><div class=\\\'r-en\\\'>'+c.en+'</div>\';this.parentElement.style.background=\'linear-gradient(180deg,#faf5ef,#f0e8d8)\'"></div></div><div class="rev-label">'+c.icon+' '+c.zh+'<span class="rev-pos-tag '+(c.reversed?'rev':'up')+'">'+(c.reversed?'逆位':'正位')+'</span></div>';bp.push('第'+(i+1)+'张：'+c.zh+'（'+c.en+'）—— '+(c.reversed?'逆位':'正位')+'，关键词：'+(c.reversed?c.rev:c.up));grid.appendChild(el)});bp.push('\n请综合以上塔罗牌，给出详细解读。');bid('copyBtn').dataset.basePrompt=bp.join('\n');bid('questionInput').value='';updatePromptText();bid('revSub').textContent=drawCount+' 张牌 · 点击牌背翻开';document.querySelectorAll('#revealGrid .rev-card').forEach((el,i)=>{el.addEventListener('click',function(){if(el.classList.contains('flipped'))return;el.classList.add('flipped');let f=document.querySelectorAll('#revealGrid .rev-card.flipped').length;bid('revSub').textContent='已翻开 '+f+'/'+cards.length+' 张';if(f===cards.length){bid('revSub').textContent='✦ 全部揭开 ✦';bid('copyBox').style.display='flex'}})});bid('copyBox').style.display='none';goPage(1)}
+function updatePromptText(){let q=bid('questionInput').value.trim(),base=bid('copyBtn').dataset.basePrompt;bid('copyBtn').dataset.fullPrompt=q?base.replace('请帮我解读以下塔罗牌：','我想问：'+q+'\n\n请帮我解读以下塔罗牌：'):base}
+function copyResult(){let t=bid('copyBtn').dataset.fullPrompt||bid('copyBtn').dataset.basePrompt;navigator.clipboard.writeText(t).then(function(){let b=bid('copyBtn');b.textContent='✅ 已复制！';b.classList.add('copied');setTimeout(function(){b.textContent='📋 复制提示词';b.classList.remove('copied')},2500)})}
+bid('questionInput').addEventListener('input',updatePromptText);
+// === P2 ===
+function goSpreads(){renderSpreadList();goPage(2)}
+function renderSpreadList(){let l=bid('spreadList');l.innerHTML='';SPREADS.forEach((s,i)=>{let d=document.createElement('div');d.className='spread-item';d.innerHTML='<div class="s-name">'+s.name+'</div><div class="s-desc">'+s.cards+'张 · '+s.desc+'</div>';d.addEventListener('click',function(){openSpread(i)});l.appendChild(d)})}
+function openSpread(i){spreadIdx=i;let s=SPREADS[i];spreadSlots=new Array(s.cards).fill(null);usedSpreadIndices.clear();bid('spreadTitle').textContent=s.name;bid('spreadDesc').textContent=s.cards+'张 · '+s.desc;bid('spreadHint').textContent='点击下方牌桌填充空位——已选过的牌变灰不可重复';bid('spreadRevealBtn').style.animation='';renderSpreadSlots();buildSpreadDeck();renderSpreadTable();goPage(3)}
+function renderSpreadSlots(){let s=SPREADS[spreadIdx],l=bid('spreadLayout');l.style.width=s.w+'px';l.style.height=s.h+'px';l.innerHTML='';s.pos.forEach((p,i)=>{let el=document.createElement('div');el.className='spread-slot';el.style.left=p.x+'px';el.style.top=p.y+'px';let filled=!!spreadSlots[i];el.innerHTML='<div class="slot-card'+(filled?' filled':'')+'" id="slot'+i+'" onclick="cancelSlot('+i+')">'+(filled?'<img src="card_back.png" alt=""><div class="slot-num" style="position:absolute">'+(i+1)+'</div>':'<div class="slot-num">'+(i+1)+'</div>')+'</div><div class="slot-label"><span class="slot-title">'+p.t+'</span><span class="slot-desc">'+p.d+'</span></div>';l.appendChild(el)})}
+function buildSpreadDeck(){spreadDeck=shuf(A).map(c=>({...c,reversed:Math.random()<.5}))}
+function renderSpreadTable(){let t=bid('spreadTable');t.innerHTML='';spreadDeck.forEach((c,i)=>{let d=document.createElement('div');d.className='card';if(usedSpreadIndices.has(i))d.classList.add('used');d.style.transform='rotate('+((Math.random()-.5)*5)+'deg)';d.dataset.index=i;d.innerHTML='<div class="card-num">'+(i+1)+'</div><div class="select-ring"></div><div class="card-inner"><div class="card-back"><img src="card_back.png" alt="" onerror="this.style.display=\'none\';this.parentElement.querySelector(\'.star\').style.display=\'block\'"><div class="star" style="display:none">✦</div></div></div>';d.addEventListener('click',function(e){e.stopPropagation();fillSlot(i,d)});t.appendChild(d)});let sw=bid('spreadTableWrap');if(sw)sw.scrollLeft=0}
+function fillSlot(i,el){if(usedSpreadIndices.has(i))return;if(spreadSlots.every(s=>s))return;let idx=spreadSlots.indexOf(null);if(idx===-1)return;spreadSlots[idx]=spreadDeck[i];usedSpreadIndices.add(i);renderSpreadSlots();renderSpreadTable();if(spreadSlots.every(s=>s)){bid('spreadHint').textContent='✨ 全部填充完毕，点击翻开牌阵！';bid('spreadRevealBtn').style.animation='pulse 1.5s infinite'}else{bid('spreadHint').textContent='已填充 '+spreadSlots.filter(s=>s).length+'/'+spreadSlots.length+' 个位置——点击上方已填充牌可取消重选'}}
+function cancelSlot(i){if(spreadSlots[i]){let idx=spreadDeck.indexOf(spreadSlots[i]);if(idx>=0)usedSpreadIndices.delete(idx);spreadSlots[i]=null;renderSpreadSlots();renderSpreadTable();bid('spreadHint').textContent='点击下方牌桌填充空位——已选过的牌变灰不可重复';bid('spreadRevealBtn').style.animation=''}}
+function shuffleSpreadDeck(){buildSpreadDeck();usedSpreadIndices.clear();spreadSlots=new Array(SPREADS[spreadIdx].cards).fill(null);renderSpreadSlots();renderSpreadTable();bid('spreadHint').textContent='点击下方牌桌填充空位';bid('spreadRevealBtn').style.animation=''}
+const sw2=bid('spreadTableWrap');if(sw2)sw2.addEventListener('wheel',function(e){e.preventDefault();sw2.scrollBy({left:e.deltaY||e.deltaX,behavior:'smooth'})},{passive:false});
+function shiftSpreadTable(d){let w=bid('spreadTableWrap');if(w)w.scrollBy({left:d,behavior:'smooth'})}
+
+// === P4 牌阵翻牌 ===
+function goSpreadReveal(){if(!spreadSlots.every(s=>s)){bid('spreadHint').textContent='请先填满所有牌位！';return}let s=SPREADS[spreadIdx],l=bid('spreadRevealLayout'),sc=1.45;l.style.width=(s.w*sc)+'px';l.style.height=(s.h*sc+50)+'px';l.innerHTML='';bid('spreadRevealTitle').textContent=s.name;bid('spreadRevealSub').textContent=s.cards+' 张牌 · 点击牌背逐一翻开';let bp=[];bp.push('请用'+s.name+'牌阵解读以下'+s.cards+'张塔罗牌：\n');spreadSlots.forEach((c,i)=>{let el=document.createElement('div');el.className='rev-card-pos'+(c.reversed?' reversed':'');el.style.left=(s.pos[i].x*sc)+'px';el.style.top=(s.pos[i].y*sc)+'px';let isrc='PaiMian/'+c.en.replace(/ /g,'_')+'.png';el.innerHTML='<div class="rev-card-inner"><div class="rev-face rev-back"><img src="card_back.png" alt=""></div><div class="rev-face rev-front"><img src="'+isrc+'" alt="'+c.zh+'" loading="lazy" onerror="this.parentElement.innerHTML=\'<div class=\\\'r-icon\\\'>'+c.icon+'</div><div class=\\\'r-en\\\'>'+c.en+'</div>\';this.parentElement.style.background=\'linear-gradient(180deg,#faf5ef,#f0e8d8)\'"></div></div><div class="rev-pos-label"><span class="rp-title">'+s.pos[i].t+'</span><span class="rp-desc">'+s.pos[i].d+'</span><span class="rp-card">'+c.icon+' '+c.zh+'<span class="rev-pos-tag '+(c.reversed?'rp-rev':'rp-up')+'">'+(c.reversed?'逆位':'正位')+'</span></span></div>';bp.push(s.pos[i].t+'（牌'+(i+1)+'）：'+c.zh+'（'+c.en+'）—— '+(c.reversed?'逆位':'正位')+'，关键词：'+(c.reversed?c.rev:c.up));l.appendChild(el);el.addEventListener('click',function(){if(el.classList.contains('flipped'))return;el.classList.add('flipped');let f=document.querySelectorAll('#spreadRevealLayout .rev-card-pos.flipped').length;bid('spreadRevealSub').textContent='已翻开 '+f+'/'+spreadSlots.length+' 张';if(f===spreadSlots.length){bid('spreadRevealSub').textContent='✦ 全部揭开 ✦';bid('spreadCopyBox').style.display='flex'}})});bp.push('\n请基于'+s.name+'牌阵的结构，给出每张牌在其位置上的详细解读以及整体关联分析。');bid('spreadCopyBtn').dataset.fullPrompt=bp.join('\n');bid('spreadCopyBox').style.display='none';goPage(4)}
+function copySpreadResult(){let t=bid('spreadCopyBtn').dataset.fullPrompt;if(!t)return;navigator.clipboard.writeText(t).then(function(){let b=bid('spreadCopyBtn');b.textContent='✅ 已复制！';b.classList.add('copied');setTimeout(function(){b.textContent='📋 复制解牌提示词';b.classList.remove('copied')},2500)})}
+buildDeck();renderTable();buildSpreadDeck();renderSpreadTable();
+</script></body></html>
