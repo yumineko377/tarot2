@@ -3,6 +3,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700&family=Cinzel:wght@400;600;700&display=swap');
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 body{min-height:100vh;overflow:hidden;background:radial-gradient(ellipse at 50% 0%,#1a1030 0%,#0a0618 55%);color:#e0d8ec;font-family:'Noto Serif SC',serif}
+@media(max-width:600px){body{overflow:auto}}
 body::before{content:'';position:fixed;inset:0;pointer-events:none;background:radial-gradient(circle at 30% 20%,rgba(180,140,220,0.04) 0%,transparent 50%),radial-gradient(circle at 70% 80%,rgba(140,100,200,0.03) 0%,transparent 50%)}
 .app{display:flex;width:500vw;height:100vh;transition:transform 0.7s cubic-bezier(0.4,0,0.2,1)}
 .app.p0{transform:translateX(0)}.app.p1{transform:translateX(-100vw)}.app.p2{transform:translateX(-200vw)}.app.p3{transform:translateX(-300vw)}.app.p4{transform:translateX(-400vw)}
@@ -91,7 +92,8 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;background:ra
 @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(200,160,240,0.4)}50%{box-shadow:0 0 0 10px rgba(200,160,240,0)}}
 @media(max-width:600px){
   .card{width:88px;height:150px;margin-left:-12px}.card-num{font-size:.5rem;top:-18px;padding:0 4px}.hero h1{font-size:1.4rem}.meditation-hint{font-size:.58rem}.btn{padding:8px 20px;font-size:.75rem}.top-bar button,.top-bar .count{padding:6px 12px;font-size:.7rem}
-  .spread-layout-wrap,.spread-reveal-wrap{max-width:100vw;overflow:auto;-webkit-overflow-scrolling:touch;justify-content:center;min-height:160px;margin:0 auto}
+  .spread-layout-wrap,.spread-reveal-wrap{max-width:100vw;overflow-x:auto;overflow-y:visible;-webkit-overflow-scrolling:touch;justify-content:center;margin:0 auto;min-height:160px}
+  .spread-layout,.spread-reveal-layout{transform:scale(.58);transform-origin:top center;margin:0 auto -25%}
 }
 </style></head><body>
 <div class="app p0" id="app">
