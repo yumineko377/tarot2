@@ -166,34 +166,279 @@ function copySpreadResult(){let t=bid('spreadCopyBtn').dataset.fullPrompt;naviga
 buildDeck();renderTable();buildSpreadDeck();renderSpreadTable();
 </script>
 <script>
-// Canvas 2D 星空背景
+// WebGL Galaxy 星空背景 —— 基于 React Bits Galaxy 组件翻译
 (function(){
-var c=document.getElementById('starBg'),ctx=c.getContext('2d'),stars=[],mx=.5,my=.5,sx=.5,sy=.5;
-function resize(){c.width=window.innerWidth;c.height=window.innerHeight}
-resize();window.addEventListener('resize',resize);
-document.addEventListener('mousemove',function(e){mx=e.clientX/c.width;my=1-e.clientY/c.height});
-for(var i=0;i<300;i++){
-  var a=Math.random()*Math.PI*2,d=Math.pow(Math.random(),1.5)*.8,r=Math.random()*.5+.2;
-  stars.push({angle:a,dist:d,radius:r*.5+.3,speed:.1+Math.random()*.2,brightness:Math.random(),twinkleSpeed:.02+Math.random()*.04,color:Math.random()>.6?'#d0c8ff':'#f0ecff'});
-}
-function draw(t){
-  ctx.clearRect(0,0,c.width,c.height);
-  sx+=(mx-sx)*.03;sy+=(my-sy)*.03;
-  var cx=c.width/2,cy=c.height/2;
-  for(var i=0;i<stars.length;i++){
-    var s=stars[i];
-    s.brightness+=s.twinkleSpeed*(Math.random()-.5);
-    s.brightness=Math.max(.35,Math.min(1,s.brightness));
-    s.angle+=s.speed*.001;
-    var x=cx+Math.cos(s.angle)*(s.dist*c.width*.6)+sx*c.width*.12;
-    var y=cy+Math.sin(s.angle)*(s.dist*c.height*.6)+sy*c.height*.12;
-    ctx.beginPath();ctx.arc(x,y,s.radius*s.brightness,0,Math.PI*2);
-    ctx.fillStyle=s.color;ctx.globalAlpha=s.brightness*.95;ctx.fill();
-    if(s.brightness>.6&&Math.random()>.9){ctx.beginPath();ctx.arc(x,y,s.radius*3.5,0,Math.PI*2);
-      ctx.fillStyle=s.color;ctx.globalAlpha=.12;ctx.fill()}
+var canvas = document.getElementById('starBg');
+var gl = canvas.getContext('webgl', { alpha: true, premultipliedAlpha: false })
+      || canvas.getContext('experimental-webgl', { alpha: true, premultipliedAlpha: false });
+if (!gl) { console.warn('WebGL not supported, falling back to simple background'); return; }
+
+gl.enable(gl.BLEND);
+gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+gl.clearColor(0, 0, 0, 0);
+
+// ---- Shaders ----
+var vertexShaderSrc = [
+'attribute vec2 uv;',
+'attribute vec2 position;',
+'varying vec2 vUv;',
+'void main() {',
+'  vUv = uv;',
+'  gl_Position = vec4(position, 0, 1);',
+'}'
+].join('\n');
+
+var fragmentShaderSrc = [
+'precision highp float;',
+'uniform float uTime;',
+'uniform vec2 uResolution;',
+'uniform vec2 uFocal;',
+'uniform vec2 uRotation;',
+'uniform float uStarSpeed;',
+'uniform float uDensity;',
+'uniform float uHueShift;',
+'uniform float uSpeed;',
+'uniform vec2 uMouse;',
+'uniform float uGlowIntensity;',
+'uniform float uSaturation;',
+'uniform float uMouseRepulsion;',
+'uniform float uTwinkleIntensity;',
+'uniform float uRotationSpeed;',
+'uniform float uRepulsionStrength;',
+'uniform float uMouseActiveFactor;',
+'uniform float uAutoCenterRepulsion;',
+'uniform float uTransparent;',
+'varying vec2 vUv;',
+'#define NUM_LAYER 4.0',
+'#define STAR_COLOR_CUTOFF 0.2',
+'#define MAT45 mat2(0.7071, -0.7071, 0.7071, 0.7071)',
+'#define PERIOD 3.0',
+'float Hash21(vec2 p) {',
+'  p = fract(p * vec2(123.34, 456.21));',
+'  p += dot(p, p + 45.32);',
+'  return fract(p.x * p.y);',
+'}',
+'float tri(float x) { return abs(fract(x) * 2.0 - 1.0); }',
+'float tris(float x) {',
+'  float t = fract(x);',
+'  return 1.0 - smoothstep(0.0, 1.0, abs(2.0 * t - 1.0));',
+'}',
+'float trisn(float x) {',
+'  float t = fract(x);',
+'  return 2.0 * (1.0 - smoothstep(0.0, 1.0, abs(2.0 * t - 1.0))) - 1.0;',
+'}',
+'vec3 hsv2rgb(vec3 c) {',
+'  vec4 K = vec4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);',
+'  vec3 p = abs(fract(c.xxx + K.xyz) * 6.0 - K.www);',
+'  return c.z * mix(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y);',
+'}',
+'float Star(vec2 uv, float flare) {',
+'  float d = length(uv);',
+'  float m = (0.05 * uGlowIntensity) / d;',
+'  float rays = smoothstep(0.0, 1.0, 1.0 - abs(uv.x * uv.y * 1000.0));',
+'  m += rays * flare * uGlowIntensity;',
+'  uv *= MAT45;',
+'  rays = smoothstep(0.0, 1.0, 1.0 - abs(uv.x * uv.y * 1000.0));',
+'  m += rays * 0.3 * flare * uGlowIntensity;',
+'  m *= smoothstep(1.0, 0.2, d);',
+'  return m;',
+'}',
+'vec3 StarLayer(vec2 uv) {',
+'  vec3 col = vec3(0.0);',
+'  vec2 gv = fract(uv) - 0.5;',
+'  vec2 id = floor(uv);',
+'  for (int y = -1; y <= 1; y++) {',
+'    for (int x = -1; x <= 1; x++) {',
+'      vec2 offset = vec2(float(x), float(y));',
+'      vec2 si = id + vec2(float(x), float(y));',
+'      float seed = Hash21(si);',
+'      float size = fract(seed * 345.32);',
+'      float glossLocal = tri(uStarSpeed / (PERIOD * seed + 1.0));',
+'      float flareSize = smoothstep(0.9, 1.0, size) * glossLocal;',
+'      float red = smoothstep(STAR_COLOR_CUTOFF, 1.0, Hash21(si + 1.0)) + STAR_COLOR_CUTOFF;',
+'      float blu = smoothstep(STAR_COLOR_CUTOFF, 1.0, Hash21(si + 3.0)) + STAR_COLOR_CUTOFF;',
+'      float grn = min(red, blu) * seed;',
+'      vec3 base = vec3(red, grn, blu);',
+'      float hue = atan(base.g - base.r, base.b - base.r) / (2.0 * 3.14159) + 0.5;',
+'      hue = fract(hue + uHueShift / 360.0);',
+'      float sat = length(base - vec3(dot(base, vec3(0.299, 0.587, 0.114)))) * uSaturation;',
+'      float val = max(max(base.r, base.g), base.b);',
+'      base = hsv2rgb(vec3(hue, sat, val));',
+'      vec2 pad = vec2(tris(seed * 34.0 + uTime * uSpeed / 10.0), tris(seed * 38.0 + uTime * uSpeed / 30.0)) - 0.5;',
+'      float star = Star(gv - offset - pad, flareSize);',
+'      vec3 color = base;',
+'      float twinkle = trisn(uTime * uSpeed + seed * 6.2831) * 0.5 + 1.0;',
+'      twinkle = mix(1.0, twinkle, uTwinkleIntensity);',
+'      star *= twinkle;',
+'      col += star * size * color;',
+'    }',
+'  }',
+'  return col;',
+'}',
+'void main() {',
+'  vec2 focalPx = uFocal * uResolution;',
+'  vec2 uv = (vUv * uResolution - focalPx) / uResolution.y;',
+'  if (uAutoCenterRepulsion > 0.0) {',
+'    vec2 centerUV = vec2(0.0, 0.0);',
+'    float centerDist = length(uv - centerUV);',
+'    vec2 repulsion = normalize(uv - centerUV) * (uAutoCenterRepulsion / (centerDist + 0.1));',
+'    uv += repulsion * 0.05;',
+'  } else if (uMouseRepulsion > 0.5) {',
+'    vec2 mousePosUV = (uMouse * uResolution - focalPx) / uResolution.y;',
+'    float mouseDist = length(uv - mousePosUV);',
+'    vec2 repulsion = normalize(uv - mousePosUV) * (uRepulsionStrength / (mouseDist + 0.1));',
+'    uv += repulsion * 0.05 * uMouseActiveFactor;',
+'  } else {',
+'    vec2 mouseNorm = uMouse - vec2(0.5);',
+'    vec2 mouseOffset = mouseNorm * 0.1 * uMouseActiveFactor;',
+'    uv += mouseOffset;',
+'  }',
+'  float autoRotAngle = uTime * uRotationSpeed;',
+'  mat2 autoRot = mat2(cos(autoRotAngle), -sin(autoRotAngle), sin(autoRotAngle), cos(autoRotAngle));',
+'  uv = autoRot * uv;',
+'  uv = mat2(uRotation.x, -uRotation.y, uRotation.y, uRotation.x) * uv;',
+'  vec3 col = vec3(0.0);',
+'  for (float i = 0.0; i < 1.0; i += 1.0 / NUM_LAYER) {',
+'    float depth = fract(i + uStarSpeed * uSpeed);',
+'    float scale = mix(20.0 * uDensity, 0.5 * uDensity, depth);',
+'    float fade = depth * smoothstep(1.0, 0.9, depth);',
+'    col += StarLayer(uv * scale + i * 453.32) * fade;',
+'  }',
+'  if (uTransparent > 0.5) {',
+'    float alpha = length(col);',
+'    alpha = smoothstep(0.0, 0.3, alpha);',
+'    alpha = min(alpha, 1.0);',
+'    gl_FragColor = vec4(col, alpha);',
+'  } else {',
+'    gl_FragColor = vec4(col, 1.0);',
+'  }',
+'}'
+].join('\n');
+
+// ---- Compile shaders ----
+function compileShader(type, source) {
+  var shader = gl.createShader(type);
+  gl.shaderSource(shader, source);
+  gl.compileShader(shader);
+  if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+    console.error('Shader compile error:', gl.getShaderInfoLog(shader));
+    gl.deleteShader(shader);
+    return null;
   }
-  ctx.globalAlpha=1;requestAnimationFrame(draw);
+  return shader;
 }
-requestAnimationFrame(draw);
+
+var vs = compileShader(gl.VERTEX_SHADER, vertexShaderSrc);
+var fs = compileShader(gl.FRAGMENT_SHADER, fragmentShaderSrc);
+if (!vs || !fs) return;
+
+var program = gl.createProgram();
+gl.attachShader(program, vs);
+gl.attachShader(program, fs);
+gl.linkProgram(program);
+if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+  console.error('Program link error:', gl.getProgramInfoLog(program));
+  return;
+}
+gl.useProgram(program);
+
+// ---- Uniform locations ----
+var uTime = gl.getUniformLocation(program, 'uTime');
+var uResolution = gl.getUniformLocation(program, 'uResolution');
+var uFocal = gl.getUniformLocation(program, 'uFocal');
+var uRotation = gl.getUniformLocation(program, 'uRotation');
+var uStarSpeed = gl.getUniformLocation(program, 'uStarSpeed');
+var uDensity = gl.getUniformLocation(program, 'uDensity');
+var uHueShift = gl.getUniformLocation(program, 'uHueShift');
+var uSpeed = gl.getUniformLocation(program, 'uSpeed');
+var uMouse = gl.getUniformLocation(program, 'uMouse');
+var uGlowIntensity = gl.getUniformLocation(program, 'uGlowIntensity');
+var uSaturation = gl.getUniformLocation(program, 'uSaturation');
+var uMouseRepulsion = gl.getUniformLocation(program, 'uMouseRepulsion');
+var uTwinkleIntensity = gl.getUniformLocation(program, 'uTwinkleIntensity');
+var uRotationSpeed = gl.getUniformLocation(program, 'uRotationSpeed');
+var uRepulsionStrength = gl.getUniformLocation(program, 'uRepulsionStrength');
+var uMouseActiveFactor = gl.getUniformLocation(program, 'uMouseActiveFactor');
+var uAutoCenterRepulsion = gl.getUniformLocation(program, 'uAutoCenterRepulsion');
+var uTransparent = gl.getUniformLocation(program, 'uTransparent');
+
+// ---- Set static uniforms (tarot purple theme) ----
+gl.uniform2f(uFocal, 0.5, 0.5);
+gl.uniform2f(uRotation, 1.0, 0.0);
+gl.uniform1f(uDensity, 1.5);
+gl.uniform1f(uHueShift, 230.0);      // 紫色调，匹配塔罗主题
+gl.uniform1f(uSpeed, 1.0);
+gl.uniform1f(uGlowIntensity, 0.6);   // 适中的光芒
+gl.uniform1f(uSaturation, 0.5);     // 柔和的色彩
+gl.uniform1f(uMouseRepulsion, 1.0);  // 开启鼠标排斥
+gl.uniform1f(uTwinkleIntensity, 0.2);
+gl.uniform1f(uRotationSpeed, 0.05);  // 缓慢旋转
+gl.uniform1f(uRepulsionStrength, 0.5);
+gl.uniform1f(uAutoCenterRepulsion, 0.0);
+gl.uniform1f(uTransparent, 1.0);     // 透明背景，让 #0a0618 透出
+
+// ---- Geometry: full-screen quad (TRIANGLE_STRIP) ----
+var positions = new Float32Array([-1,-1, 1,-1, -1,1, 1,1]);
+var uvs = new Float32Array([0,0, 1,0, 0,1, 1,1]);
+
+var posBuf = gl.createBuffer();
+gl.bindBuffer(gl.ARRAY_BUFFER, posBuf);
+gl.bufferData(gl.ARRAY_BUFFER, positions, gl.STATIC_DRAW);
+var posLoc = gl.getAttribLocation(program, 'position');
+gl.enableVertexAttribArray(posLoc);
+gl.vertexAttribPointer(posLoc, 2, gl.FLOAT, false, 0, 0);
+
+var uvBuf = gl.createBuffer();
+gl.bindBuffer(gl.ARRAY_BUFFER, uvBuf);
+gl.bufferData(gl.ARRAY_BUFFER, uvs, gl.STATIC_DRAW);
+var uvLoc = gl.getAttribLocation(program, 'uv');
+gl.enableVertexAttribArray(uvLoc);
+gl.vertexAttribPointer(uvLoc, 2, gl.FLOAT, false, 0, 0);
+
+// ---- Mouse state ----
+var targetMouseX = 0.5, targetMouseY = 0.5;
+var smoothMouseX = 0.5, smoothMouseY = 0.5;
+var targetMouseActive = 0.0, smoothMouseActive = 0.0;
+
+function resize() {
+  var dpr = Math.min(window.devicePixelRatio || 1, 2);
+  canvas.width = window.innerWidth * dpr;
+  canvas.height = window.innerHeight * dpr;
+  canvas.style.width = window.innerWidth + 'px';
+  canvas.style.height = window.innerHeight + 'px';
+  gl.viewport(0, 0, canvas.width, canvas.height);
+  gl.uniform2f(uResolution, canvas.width, canvas.height);
+}
+resize();
+window.addEventListener('resize', resize);
+
+document.addEventListener('mousemove', function(e) {
+  targetMouseX = e.clientX / window.innerWidth;
+  targetMouseY = 1.0 - e.clientY / window.innerHeight;
+  targetMouseActive = 1.0;
+});
+document.addEventListener('mouseleave', function() {
+  targetMouseActive = 0.0;
+});
+
+// ---- Animation loop ----
+function animate(t) {
+  requestAnimationFrame(animate);
+
+  var lerp = 0.05;
+  smoothMouseX += (targetMouseX - smoothMouseX) * lerp;
+  smoothMouseY += (targetMouseY - smoothMouseY) * lerp;
+  smoothMouseActive += (targetMouseActive - smoothMouseActive) * lerp;
+
+  var time = t * 0.001;
+  gl.uniform1f(uTime, time);
+  gl.uniform1f(uStarSpeed, time * 0.3 / 10.0);  // starSpeed=0.5
+  gl.uniform2f(uMouse, smoothMouseX, smoothMouseY);
+  gl.uniform1f(uMouseActiveFactor, smoothMouseActive);
+
+  gl.clear(gl.COLOR_BUFFER_BIT);
+  gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+}
+requestAnimationFrame(animate);
 })();
 </script></body></html>
