@@ -3,8 +3,33 @@
 @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700&family=Cinzel:wght@400;600;700&display=swap');
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 body{overflow:hidden;background:#0a0618;color:#e0d8ec;font-family:'Noto Serif SC',serif;min-height:100vh}
-body::before{content:none}
-#galaxyBg{position:fixed;inset:0;z-index:0;width:100vw;height:100vh}
+body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:
+    radial-gradient(1px 1px at 10% 15%,rgba(255,255,255,0.6),transparent),
+    radial-gradient(1px 1px at 25% 35%,rgba(255,255,255,0.5),transparent),
+    radial-gradient(1.5px 1.5px at 40% 10%,rgba(200,180,255,0.7),transparent),
+    radial-gradient(1px 1px at 55% 25%,rgba(255,255,255,0.4),transparent),
+    radial-gradient(1px 1px at 70% 40%,rgba(180,220,255,0.6),transparent),
+    radial-gradient(1.5px 1.5px at 85% 20%,rgba(255,255,255,0.5),transparent),
+    radial-gradient(1px 1px at 15% 55%,rgba(200,200,255,0.5),transparent),
+    radial-gradient(1px 1px at 30% 65%,rgba(255,255,255,0.4),transparent),
+    radial-gradient(1.5px 1.5px at 50% 50%,rgba(220,200,255,0.6),transparent),
+    radial-gradient(1px 1px at 65% 60%,rgba(255,255,255,0.5),transparent),
+    radial-gradient(1px 1px at 80% 70%,rgba(180,200,255,0.4),transparent),
+    radial-gradient(1.5px 1.5px at 20% 80%,rgba(255,255,255,0.5),transparent),
+    radial-gradient(1px 1px at 45% 75%,rgba(200,220,255,0.6),transparent),
+    radial-gradient(1px 1px at 60% 85%,rgba(255,255,255,0.4),transparent),
+    radial-gradient(1.5px 1.5px at 75% 55%,rgba(220,180,255,0.5),transparent),
+    radial-gradient(1px 1px at 90% 65%,rgba(255,255,255,0.4),transparent),
+    radial-gradient(1px 1px at 5% 90%,rgba(200,200,255,0.5),transparent),
+    radial-gradient(1px 1px at 35% 95%,rgba(255,255,255,0.4),transparent),
+    radial-gradient(1.5px 1.5px at 55% 15%,rgba(180,220,255,0.5),transparent),
+    radial-gradient(1px 1px at 95% 85%,rgba(255,255,255,0.4),transparent),
+    radial-gradient(ellipse at 30% 20%,rgba(180,140,220,0.05) 0%,transparent 50%),
+    radial-gradient(ellipse at 70% 80%,rgba(140,100,200,0.04) 0%,transparent 50%);
+  animation: twinkle 8s ease-in-out infinite alternate;
+}
+@keyframes twinkle{0%{opacity:.8}100%{opacity:1}}
 .app{display:flex;width:500vw;height:100vh;transition:transform 0.7s cubic-bezier(0.4,0,0.2,1);position:relative;z-index:1}
 .app.p0{transform:translateX(0)}.app.p1{transform:translateX(-100vw)}.app.p2{transform:translateX(-200vw)}.app.p3{transform:translateX(-300vw)}.app.p4{transform:translateX(-400vw)}
 .page{width:100vw;height:100vh;flex-shrink:0;display:flex;flex-direction:column;align-items:center;padding:16px;overflow-y:auto;overflow-x:hidden}
@@ -72,7 +97,6 @@ body::before{content:none}
   .hint{font-size:.62rem}.copy-btn{padding:8px 24px;font-size:.75rem}
 }
 </style></head><body>
-<canvas id="galaxyBg"></canvas>
 <div class="app p0" id="app">
 <!-- P0 -->
 <div class="page" id="selectPage"><div class="hero"><h1>✦ Tarot ✦</h1><div class="sub">韦特系塔罗牌</div><div class="by">by LD</div></div><div class="top-bar"><button class="active" data-n="1">抽1张</button><button data-n="3">抽3张</button><button data-n="5">抽5张</button><div class="count" id="count">已选 0 张</div></div><div class="hint" id="hint">🃏 滑动牌桌 → 点击选牌 → 翻开</div><div class="meditation-hint">✦ 抽牌时请静心默念心中所问，凭直觉选择与你共鸣的牌 ✦</div><div class="table-area"><div class="arrow arrow-left" onclick="shiftTable(-250)">◀</div><div class="arrow arrow-right" onclick="shiftTable(250)">▶</div><div class="table-wrap" id="tableWrap"><div class="table" id="table"></div></div></div><div class="bottom-bar"><button class="btn" onclick="shuffleDeck()">🔮 重新洗牌</button><button class="btn accent" onclick="goReveal()" id="revealBtn">✨ 翻开</button><button class="btn" onclick="goSpreads()">📐 牌阵</button></div></div>
@@ -164,62 +188,4 @@ function goSpreadReveal(){if(!spreadSlots.every(s=>s)){bid('spreadHint').textCon
 function copySpreadResult(){let t=bid('spreadCopyBtn').dataset.fullPrompt;navigator.clipboard.writeText(t).then(function(){let b=bid('spreadCopyBtn');b.textContent='✅ 已复制！';b.classList.add('copied');setTimeout(function(){b.textContent='📋 复制解牌提示词';b.classList.remove('copied')},2500)})}
 
 buildDeck();renderTable();buildSpreadDeck();renderSpreadTable();
-</script>
-<script src="https://unpkg.com/ogl@1.0.9/dist/ogl.umd.js"></script>
-<script>
-console.log('OGL loaded:',typeof OGL);
-(function(){
-const c=document.getElementById('galaxyBg'),gl=new OGL.Renderer({canvas:c,alpha:true}).gl;
-gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);gl.clearColor(0,0,0,0);
-const vs=`attribute vec2 uv,position;varying vec2 vUv;void main(){vUv=uv;gl_Position=vec4(position,0,1);}`;
-const fs=`
-precision highp float;uniform float uTime,uStarSpeed,uDensity,uHueShift,uSpeed,uGlowIntensity,uSaturation,uTwinkleIntensity,uRotationSpeed,uRepulsionStrength,uMouseActiveFactor,uAutoCenterRepulsion;uniform vec3 uResolution;uniform vec2 uFocal,uRotation,uMouse;uniform bool uMouseRepulsion,uTransparent;varying vec2 vUv;
-#define NUM_LAYER 4.0
-#define MAT45 mat2(0.7071,-0.7071,0.7071,0.7071)
-float H21(vec2 p){p=fract(p*vec2(123.34,456.21));p+=dot(p,p+45.32);return fract(p.x*p.y);}
-float tri(float x){return abs(fract(x)*2.-1.);}
-float tris(float x){float t=fract(x);return 1.-smoothstep(0.,1.,abs(2.*t-1.));}
-float trisn(float x){float t=fract(x);return 2.*(1.-smoothstep(0.,1.,abs(2.*t-1.)))-1.;}
-vec3 hsv2rgb(vec3 c){vec4 K=vec4(1.,2./3.,1./3.,3.);vec3 p=abs(fract(c.xxx+K.xyz)*6.-K.www);return c.z*mix(K.xxx,clamp(p-K.xxx,0.,1.),c.y);}
-float Star(vec2 uv,float flare){float d=length(uv);float m=(.05*uGlowIntensity)/d;float rays=smoothstep(0.,1.,1.-abs(uv.x*uv.y*1000.));m+=rays*flare*uGlowIntensity;uv*=MAT45;rays=smoothstep(0.,1.,1.-abs(uv.x*uv.y*1000.));m+=rays*.3*flare*uGlowIntensity;m*=smoothstep(1.,.2,d);return m;}
-vec3 StarLayer(vec2 uv){vec3 col=vec3(0.);vec2 gv=fract(uv)-.5,id=floor(uv);
-for(int y=-1;y<=1;y++)for(int x=-1;x<=1;x++){vec2 o=vec2(float(x),float(y)),si=id+o;
-float seed=H21(si),size=fract(seed*345.32),gloss=tri(uStarSpeed/(3.*seed+1.)),flareSize=smoothstep(.9,1.,size)*gloss;
-float r=smoothstep(.2,1.,H21(si+1.))+.2,b=smoothstep(.2,1.,H21(si+3.))+.2,g=min(r,b)*seed;
-vec3 base=vec3(r,g,b);float hue=atan(base.g-base.r,base.b-base.r)/6.283185+.5;hue=fract(hue+uHueShift/360.);
-float sat=length(base-vec3(dot(base,vec3(.299,.587,.114))))*uSaturation,val=max(max(base.r,base.g),base.b);base=hsv2rgb(vec3(hue,sat,val));
-vec2 pad=vec2(tris(seed*34.+uTime*uSpeed/10.),tris(seed*38.+uTime*uSpeed/30.))-.5;
-float star=Star(gv-o-pad,flareSize);vec3 color=base;
-float twinkle=trisn(uTime*uSpeed+seed*6.2831)*.5+1.;twinkle=mix(1.,twinkle,uTwinkleIntensity);star*=twinkle;
-col+=star*size*color;}return col;}
-void main(){vec2 fp=uFocal*uResolution.xy,uv=(vUv*uResolution.xy-fp)/uResolution.y;
-if(uAutoCenterRepulsion>0.){vec2 cuv=vec2(0.);float cd=length(uv-cuv);uv+=normalize(uv-cuv)*(uAutoCenterRepulsion/(cd+.1))*.05;}
-else if(uMouseRepulsion){vec2 mp=(uMouse*uResolution.xy-fp)/uResolution.y;float md=length(uv-mp);uv+=normalize(uv-mp)*(uRepulsionStrength/(md+.1))*.05*uMouseActiveFactor;}
-else{uv+=(uMouse-vec2(.5))*.1*uMouseActiveFactor;}
-float ang=uTime*uRotationSpeed;mat2 ar=mat2(cos(ang),-sin(ang),sin(ang),cos(ang));uv=ar*uv;
-uv=mat2(uRotation.x,-uRotation.y,uRotation.y,uRotation.x)*uv;
-vec3 col=vec3(0.);for(float i=0.;i<1.;i+=.25){float depth=fract(i+uStarSpeed*uSpeed),scale=mix(20.*uDensity,.5*uDensity,depth),fade=depth*smoothstep(1.,.9,depth);col+=StarLayer(uv*scale+i*453.32)*fade;}
-if(uTransparent){float a=length(col);a=smoothstep(0.,.3,a);a=min(a,1.);gl_FragColor=vec4(col,a);}else gl_FragColor=vec4(col,1.);}`;
-
-let sm={x:.5,y:.5},tm={x:.5,y:.5},sa=0,ta=0;
-const prog=new OGL.Program(gl,{vertex:vs,fragment:fs,uniforms:{
-uTime:{value:0},uResolution:{value:new OGL.Color(c.width,c.height,c.width/c.height)},uFocal:{value:new Float32Array([.5,.5])},
-uRotation:{value:new Float32Array([1.,0.])},uStarSpeed:{value:.5},uDensity:{value:1},uHueShift:{value:230},uSpeed:{value:.8},
-uMouse:{value:new Float32Array([.5,.5])},uGlowIntensity:{value:.5},uSaturation:{value:.2},uMouseRepulsion:{value:true},
-uTwinkleIntensity:{value:.4},uRotationSpeed:{value:.08},uRepulsionStrength:{value:2},uMouseActiveFactor:{value:0},
-uAutoCenterRepulsion:{value:0},uTransparent:{value:true}}});
-const mesh=new OGL.Mesh(gl,{geometry:new OGL.Triangle(gl),program:prog});
-function resize(){gl.renderer.setSize(c.offsetWidth,c.offsetHeight);prog.uniforms.uResolution.value=new OGL.Color(gl.canvas.width,gl.canvas.height,gl.canvas.width/gl.canvas.height)}
-window.addEventListener('resize',resize);resize();
-document.addEventListener('mousemove',e=>{tm.x=e.clientX/window.innerWidth;tm.y=1-e.clientY/window.innerHeight;ta=1});
-document.addEventListener('mouseleave',()=>{ta=0});
-function loop(t){requestAnimationFrame(loop);prog.uniforms.uTime.value=t*.001;prog.uniforms.uStarSpeed.value=t*.001*.5/10;
-sm.x+=(tm.x-sm.x)*.05;sm.y+=(tm.y-sm.y)*.05;sa+=(ta-sa)*.05;
-prog.uniforms.uMouse.value[0]=sm.x;prog.uniforms.uMouse.value[1]=sm.y;prog.uniforms.uMouseActiveFactor.value=sa;
-gl.renderer.render({scene:mesh})}
-requestAnimationFrame(loop);
-})();
-if(typeof OGL==='undefined'||!document.getElementById('galaxyBg')){
-  document.body.style.background='radial-gradient(ellipse at 50% 0%,#1a1030 0%,#0a0618 55%)';
-}
 </script></body></html>
