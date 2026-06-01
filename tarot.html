@@ -73,6 +73,28 @@ body::before{content:none}
 /* 洗牌时允许牌飞出容器 */
 .table-area.shuffle-open,.page.shuffle-open{overflow:visible!important}
 .table-area.shuffle-open .table-wrap{overflow:visible!important}
+
+/* === 牌阵洗牌：重叠聚拢效果 === */
+#spreadTable .card.shuffle-phase { z-index: var(--zi,1); }
+#spreadTable .card.lifting {
+  animation: stackGather 0.4s cubic-bezier(0.4,0,0.2,1) forwards;
+}
+@keyframes stackGather {
+  0%   { transform: translateY(0) translateX(0) rotate(var(--rot,0deg)) scale(1); opacity: 1; }
+  100% { transform: translateY(calc(-35vh)) translateX(var(--gx,0px)) rotate(0deg) scale(0.35); opacity: 0.9; }
+}
+#spreadTable .card.shuffling {
+  animation: stackScramble 0.5s ease-in-out forwards;
+  z-index: var(--zi,1);
+}
+@keyframes stackScramble {
+  0%   { transform: translateY(calc(-35vh)) translateX(var(--gx,0px)) rotate(0deg) scale(0.35); }
+  18%  { transform: translateY(calc(-40vh)) translateX(calc(var(--gx,0px) + 10px)) rotate(var(--sr,15deg)) scale(0.32); }
+  36%  { transform: translateY(calc(-30vh)) translateX(calc(var(--gx,0px) - 8px)) rotate(calc(var(--sr,12deg) * -1)) scale(0.38); }
+  54%  { transform: translateY(calc(-38vh)) translateX(var(--gx,0px)) rotate(calc(var(--sr,8deg))) scale(0.33); }
+  72%  { transform: translateY(calc(-33vh)) translateX(calc(var(--gx,0px) + 5px)) rotate(calc(var(--sr,5deg) * -1)) scale(0.36); }
+  100% { transform: translateY(calc(-35vh)) translateX(var(--gx,0px)) rotate(0deg) scale(0.35); opacity: 0.55; }
+}
 /* 牌桌洗牌时的遮罩提示 */
 .shuffle-overlay {
   position: fixed; inset: 0; z-index: 5; pointer-events: none;
@@ -374,25 +396,27 @@ function cancelSlot(i){if(spreadSlots[i]){let idx=spreadDeck.indexOf(spreadSlots
 function shuffleSpreadDeck(){
   var cards=document.querySelectorAll('#spreadTable .card');
   if(cards.length===0){buildSpreadDeck();usedIndices.clear();spreadSlots=new Array(SPREADS[spreadIdx].cards).fill(null);renderSpreadSlots();renderSpreadTable();return}
-  // 打开overflow
   var ta=document.querySelectorAll('.table-area')[1],pg=document.querySelector('.app');
   if(ta)ta.classList.add('shuffle-open');if(pg)pg.style.overflow='visible';
   cards.forEach(function(c,i){
     c.classList.remove('dealing','lifting','shuffling','shuffle-phase');
     void c.offsetWidth;
   });
+  // Phase 1: 重叠聚拢 —— 全部飞向同一中心点，紧密堆叠
   cards.forEach(function(c,i){
-    c.style.setProperty('--gx',((i-cards.length/2)*2)+'px');
-    c.style.setProperty('--sx',((Math.random()-.5)*120)+'px');
-    c.style.setProperty('--sr',((Math.random()-.5)*50)+'deg');
+    c.style.setProperty('--zi',i);
+    c.style.setProperty('--gx',((i-cards.length/2)*0.25)+'px');
+    c.style.setProperty('--sr',((Math.random()-.5)*35)+'deg');
     c.classList.add('shuffle-phase','lifting');
   });
+  // Phase 2: 叠在一起打乱
   setTimeout(function(){
     cards.forEach(function(c,i){
       c.classList.remove('lifting');c.classList.add('shuffling');
-      c.style.animationDelay=(i%6)*20+'ms';
+      c.style.animationDelay=(i%5)*25+'ms';
     });
   },400);
+  // Phase 3: 散回桌面
   setTimeout(function(){
     buildSpreadDeck();usedIndices.clear();spreadSlots=new Array(SPREADS[spreadIdx].cards).fill(null);
     renderSpreadSlots();renderSpreadTable(true);
@@ -400,7 +424,7 @@ function shuffleSpreadDeck(){
     setTimeout(function(){
       document.querySelectorAll('#spreadTable .card').forEach(function(c){c.classList.remove('dealing')});
     },1200);
-  },980)
+  },950)
 }
 const sw2=bid('spreadTableWrap');if(sw2)sw2.addEventListener('wheel',function(e){e.preventDefault();sw2.scrollBy({left:e.deltaY||e.deltaX,behavior:'smooth'})},{passive:false});
 function shiftSpreadTable(d){let w=bid('spreadTableWrap');if(w)w.scrollBy({left:d,behavior:'smooth'})}
