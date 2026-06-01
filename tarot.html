@@ -257,18 +257,12 @@ function draw(t) {
     var bx = 0.5 + Math.cos(s.angle) * s.radius;
     var by = 0.5 + Math.sin(s.angle) * s.radius;
 
-    // Mouse repulsion
-    var dx = bx - smx, dy = by - smy;
-    var dist = Math.sqrt(dx * dx + dy * dy);
-    var repulsion = 0;
-    if (dist < 0.2 && ma > 0.01) {
-      repulsion = (0.2 - dist) / 0.2 * ma * 0.04;
-    }
-    var rx = dx / (dist + 0.001) * repulsion;
-    var ry = dy / (dist + 0.001) * repulsion;
+    // Parallax offset — starfield shifts with mouse
+    var ox = (smx - 0.5) * c.width * 0.12;
+    var oy = (smy - 0.5) * c.height * 0.12;
 
-    var px = (bx + rx) * c.width;
-    var py = (by + ry) * c.height;
+    var px = bx * c.width + ox;
+    var py = by * c.height + oy;
 
     // Twinkle
     s.twinklePhase += s.twinkleSpeed;
