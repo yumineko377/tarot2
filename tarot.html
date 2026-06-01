@@ -4,7 +4,7 @@
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 body{overflow:hidden;background:#0a0618;color:#e0d8ec;font-family:'Noto Serif SC',serif;min-height:100vh}
 body::before{content:none}
-#galaxyBg{position:fixed;inset:0;z-index:0;width:100vw;height:100vh;pointer-events:none}
+#galaxyBg{position:fixed;inset:0;z-index:0;width:100vw;height:100vh}
 .app{display:flex;width:500vw;height:100vh;transition:transform 0.7s cubic-bezier(0.4,0,0.2,1);position:relative;z-index:1}
 .app.p0{transform:translateX(0)}.app.p1{transform:translateX(-100vw)}.app.p2{transform:translateX(-200vw)}.app.p3{transform:translateX(-300vw)}.app.p4{transform:translateX(-400vw)}
 .page{width:100vw;height:100vh;flex-shrink:0;display:flex;flex-direction:column;align-items:center;padding:16px;overflow-y:auto;overflow-x:hidden}
@@ -165,8 +165,9 @@ function copySpreadResult(){let t=bid('spreadCopyBtn').dataset.fullPrompt;naviga
 
 buildDeck();renderTable();buildSpreadDeck();renderSpreadTable();
 </script>
-<script src="https://cdn.jsdelivr.net/npm/ogl@1.0.9/dist/ogl.umd.js"></script>
+<script src="https://unpkg.com/ogl@1.0.9/dist/ogl.umd.js"></script>
 <script>
+console.log('OGL loaded:',typeof OGL);
 (function(){
 const c=document.getElementById('galaxyBg'),gl=new OGL.Renderer({canvas:c,alpha:true}).gl;
 gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);gl.clearColor(0,0,0,0);
@@ -218,4 +219,7 @@ prog.uniforms.uMouse.value[0]=sm.x;prog.uniforms.uMouse.value[1]=sm.y;prog.unifo
 gl.renderer.render({scene:mesh})}
 requestAnimationFrame(loop);
 })();
+if(typeof OGL==='undefined'||!document.getElementById('galaxyBg')){
+  document.body.style.background='radial-gradient(ellipse at 50% 0%,#1a1030 0%,#0a0618 55%)';
+}
 </script></body></html>
