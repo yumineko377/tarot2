@@ -15,10 +15,10 @@ body::before{content:none}
 .table{display:flex;gap:0;align-items:center;padding:10px 36px 0;min-width:max-content}
 .card{width:110px;height:187px;flex-shrink:0;position:relative;margin-left:-16px;cursor:pointer;transition:transform .35s cubic-bezier(0.34,1.56,0.64,1)}.card:first-child{margin-left:0}.card.selected{transform:translateY(-22px) scale(1.08);z-index:10}.card.selected .card-inner{box-shadow:0 0 24px rgba(200,160,240,0.5)}.card.used{opacity:.35;pointer-events:none;transform:rotate(0)!important}
 /* === 洗牌动画：聚拢 → 打乱 → 散开 === */
-.card.shuffle-phase { pointer-events: none; }
+.card.shuffle-phase,.slot-card.shuffle-phase { pointer-events: none; }
 
 /* 阶段1：聚拢 —— 牌飞向屏幕中央 */
-.card.lifting {
+.card.lifting,.slot-card.lifting {
   animation: cardFlyCenter 0.4s cubic-bezier(0.4,0,0.2,1) forwards;
 }
 @keyframes cardFlyCenter {
@@ -27,7 +27,7 @@ body::before{content:none}
 }
 
 /* 阶段2：打乱 —— 在屏幕中央炸开、乱序碰撞 */
-.card.shuffling {
+.card.shuffling,.slot-card.shuffling {
   animation: cardScramble 0.55s ease-in-out forwards;
   z-index: 10;
 }
@@ -43,7 +43,7 @@ body::before{content:none}
 }
 
 /* 阶段3：散开 —— 从屏幕中央一张张弹回桌面 */
-.card.dealing {
+.card.dealing,.slot-card.dealing {
   animation: cardSpread 0.55s cubic-bezier(0.34,1.56,0.64,1) forwards;
   opacity: 0;
 }
@@ -330,8 +330,8 @@ const wrap=bid('tableWrap');wrap.addEventListener('wheel',function(e){e.preventD
 function shiftTable(d){bid('tableWrap').scrollBy({left:d,behavior:'smooth'})}
 document.querySelectorAll('#selectPage .top-bar button[data-n]').forEach(b=>{b.addEventListener('click',function(){document.querySelectorAll('#selectPage .top-bar button[data-n]').forEach(x=>x.classList.remove('active'));this.classList.add('active');drawCount=parseInt(this.dataset.n);shuffleDeck()})});
 // P1
-function goReveal(){if(selectedCards.size===0){bid('hint').textContent='请先选牌！';return}let grid=bid('revealGrid');grid.innerHTML='';let arr=Array.from(selectedCards).sort((a,b)=>a-b),cards=arr.map(i=>deck[i]);let bp=[];bp.push('你是一位经验丰富的塔罗解读师。你的解读风格：用大白话讲透牌面，不讲玄学黑话；逆位不只说「不好」，而是指出心理卡点和调整方向；把多张牌串成一个连贯的故事；给出可落地的建议，不说套话。语气是朋友式深度对话，温和直白。\n\n【求问者的问题】\n'+(bid('questionInput').value.trim()||'（求问者未填写具体问题，请根据牌面自行推断ta可能关心的方向）')+'\n\n【抽到的牌】\n');cards.forEach((c,i)=>{let el=document.createElement('div');el.className='rev-card'+(c.reversed?' reversed':'');let isrc='PaiMian/'+c.en.replace(/ /g,'_')+'.webp';el.innerHTML='<div class="rev-card-inner"><div class="rev-face rev-back"><img src="card_back.webp" alt=""></div><div class="rev-face rev-front"><img src="'+isrc+'" alt="'+c.zh+'" onerror="this.parentElement.innerHTML=\'<div style=font-size:2rem>'+c.icon+'</div>\'"></div></div><div class="rev-label">'+c.icon+' '+c.zh+'<span class="rev-pos-tag '+(c.reversed?'rev':'up')+'">'+(c.reversed?'逆位':'正位')+'</span></div>';bp.push('第'+(i+1)+'张：'+c.zh+'（'+c.en+'）—— '+(c.reversed?'逆位':'正位')+',关键词：'+(c.reversed?c.rev:c.up));grid.appendChild(el)});bp.push('\n\n请按以下结构解读：\n\n🔮 逐张解读（每张牌包含）：\n① 画面简述（一句话描述牌上画了什么）\n② 核心含义（正位代表什么 / 逆位能量被什么堵住了）\n③ 对求问者的意义（把牌意对应到ta正在面对的真实困境上，不要只讲通用牌义）\n\n🧩 牌面关联：\n分析牌与牌之间的逻辑关系——是第一张导致了第二张？还是互相矛盾？有没有重复出现的元素（宝剑/思维、圣杯/情感、权杖/行动、星币/现实）？\n\n📖 你的故事：\n把所有牌串成一个连贯叙事，像是给求问者讲一个关于ta当前处境的故事。格式：「你现在正处于______（第1张），然后你______（第2张），更深层的原因是______（第3张）……」\n\n💡 行动建议（至少3条，每条都要能从牌面中找到依据）：\n要求：不说「保持积极心态」这种空话，每条建议都要具体可执行，并说明是对应哪张牌的提示。\n\n【输出规则】\n- 每张牌必须逐张解读，不可合并跳过\n- 尽量避免宿命论表述，强调人的主观能动性\n- 用中文输出，排版清晰分段');let b=bid('copyBtn');b.dataset.basePrompt=bp.join('\n');bid('questionInput').value='';updatePT();bid('revSub').textContent=drawCount+' 张牌 · 点击牌背翻开';document.querySelectorAll('#revealGrid .rev-card').forEach(el=>{el.addEventListener('click',function(){if(el.classList.contains('flipped'))return;el.classList.add('flipped');let f=document.querySelectorAll('#revealGrid .rev-card.flipped').length;bid('revSub').textContent='已翻开 '+f+'/'+cards.length+' 张';if(f===cards.length){bid('revSub').textContent='✦ 全部揭开 ✦';bid('copyBox').style.display='flex'}})});bid('copyBox').style.display='none';goPage(1)}
-function updatePT(){let q=bid('questionInput').value.trim(),base=bid('copyBtn').dataset.basePrompt;bid('copyBtn').dataset.fullPrompt=q?base.replace('请帮我解读以下塔罗牌：','我想问：'+q+'\n\n请帮我解读以下塔罗牌：'):base}
+function goReveal(){if(selectedCards.size===0){bid('hint').textContent='请先选牌！';return}let grid=bid('revealGrid');grid.innerHTML='';let arr=Array.from(selectedCards).sort((a,b)=>a-b),cards=arr.map(i=>deck[i]);let bp=[];var qEl=bid('questionInput'),question=qEl.value.trim()||'（求问者未填写具体问题，请根据牌面自行推断ta可能关心的方向）';var promptPre='你是一位经验丰富的塔罗解读师。你的解读风格：用大白话讲透牌面，不讲玄学黑话；逆位不只说「不好」，而是指出心理卡点和调整方向；把多张牌串成一个连贯的故事；给出可落地的建议，不说套话。语气是朋友式深度对话，温和直白。\n\n【求问者的问题】\n';bp.push(promptPre+question+'\n\n【抽到的牌】\n');cards.forEach((c,i)=>{let el=document.createElement('div');el.className='rev-card'+(c.reversed?' reversed':'');let isrc='PaiMian/'+c.en.replace(/ /g,'_')+'.webp';el.innerHTML='<div class="rev-card-inner"><div class="rev-face rev-back"><img src="card_back.webp" alt=""></div><div class="rev-face rev-front"><img src="'+isrc+'" alt="'+c.zh+'" onerror="this.parentElement.innerHTML=\'<div style=font-size:2rem>'+c.icon+'</div>\'"></div></div><div class="rev-label">'+c.icon+' '+c.zh+'<span class="rev-pos-tag '+(c.reversed?'rev':'up')+'">'+(c.reversed?'逆位':'正位')+'</span></div>';bp.push('第'+(i+1)+'张：'+c.zh+'（'+c.en+'）—— '+(c.reversed?'逆位':'正位')+',关键词：'+(c.reversed?c.rev:c.up));grid.appendChild(el)});bp.push('\n\n请按以下结构解读：\n\n🔮 逐张解读（每张牌包含）：\n① 画面简述（一句话描述牌上画了什么）\n② 核心含义（正位代表什么 / 逆位能量被什么堵住了）\n③ 对求问者的意义（把牌意对应到ta正在面对的真实困境上，不要只讲通用牌义）\n\n🧩 牌面关联：\n分析牌与牌之间的逻辑关系——是第一张导致了第二张？还是互相矛盾？有没有重复出现的元素（宝剑/思维、圣杯/情感、权杖/行动、星币/现实）？\n\n📖 你的故事：\n把所有牌串成一个连贯叙事，像是给求问者讲一个关于ta当前处境的故事。格式：「你现在正处于______（第1张），然后你______（第2张），更深层的原因是______（第3张）……」\n\n💡 行动建议（至少3条，每条都要能从牌面中找到依据）：\n要求：不说「保持积极心态」这种空话，每条建议都要具体可执行，并说明是对应哪张牌的提示。\n\n【输出规则】\n- 每张牌必须逐张解读，不可合并跳过\n- 尽量避免宿命论表述，强调人的主观能动性\n- 用中文输出，排版清晰分段');var b=bid('copyBtn');var full=bp.join('\n');b.dataset.basePrompt=full;b.dataset.promptPre=promptPre;b.dataset.promptPost=full.substring(full.indexOf('\n\n【抽到的牌】'));bid('questionInput').value='';updatePT();bid('revSub').textContent=drawCount+' 张牌 · 点击牌背翻开';document.querySelectorAll('#revealGrid .rev-card').forEach(el=>{el.addEventListener('click',function(){if(el.classList.contains('flipped'))return;el.classList.add('flipped');let f=document.querySelectorAll('#revealGrid .rev-card.flipped').length;bid('revSub').textContent='已翻开 '+f+'/'+cards.length+' 张';if(f===cards.length){bid('revSub').textContent='✦ 全部揭开 ✦';bid('copyBox').style.display='flex'}})});bid('copyBox').style.display='none';goPage(1)}
+function updatePT(){var q=bid('questionInput').value.trim()||'（求问者未填写具体问题，请根据牌面自行推断ta可能关心的方向）';var b=bid('copyBtn');b.dataset.fullPrompt=b.dataset.promptPre+q+b.dataset.promptPost}
 function copyResult(){let t=bid('copyBtn').dataset.fullPrompt||bid('copyBtn').dataset.basePrompt;navigator.clipboard.writeText(t).then(function(){let b=bid('copyBtn');b.textContent='✅ 已复制！';b.classList.add('copied');setTimeout(function(){b.textContent='📋 复制提示词';b.classList.remove('copied')},2500)})}
 bid('questionInput').addEventListener('input',updatePT);
 
@@ -348,28 +348,21 @@ function renderSpreadSlots(){
 function buildSpreadDeck(){spreadDeck=shuf(A).map(c=>({...c,reversed:Math.random()<.5}))}
 function renderSpreadTable(animate){let t=bid('spreadTable');t.innerHTML='';spreadDeck.forEach((c,i)=>{let d=document.createElement('div');d.className='card';if(usedIndices.has(i))d.classList.add('used');var rot=((Math.random()-.5)*5);d.style.setProperty('--rot',rot+'deg');d.style.transform='rotate('+rot+'deg)';if(animate){d.classList.add('dealing');d.style.animationDelay=(i*8)+'ms'};d.innerHTML='<div class="card-num">'+(i+1)+'</div><div class="card-inner"><div class="card-back"><img src="card_back.webp" alt=""></div></div>';d.addEventListener('click',function(e){e.stopPropagation();fillSlot(i,d)});t.appendChild(d)});let sw=bid('spreadTableWrap');if(sw)sw.scrollLeft=0}
 function fillSlot(i,el){
-  if(usedIndices.has(i)||spreadSlots.every(function(s){return s}))return;
-  var idx=spreadSlots.indexOf(null);if(idx===-1)return;
+  if(usedIndices.has(i))return;
   if(el._flying)return;el._flying=true;
-  
-  // 获取卡牌和槽位位置
+  var idx=spreadSlots.indexOf(null);if(idx===-1){el._flying=false;return}
+  spreadSlots[idx]={_reserved:true};
   var cr=el.getBoundingClientRect();
   var slot=bid('slot'+idx);
-  if(!slot){spreadSlots[idx]=spreadDeck[i];usedIndices.add(i);renderSpreadSlots();renderSpreadTable();return}
+  if(!slot){el._flying=false;spreadSlots[idx]=spreadDeck[i];usedIndices.add(i);renderSpreadSlots();renderSpreadTable();return}
   var sr=slot.getBoundingClientRect();
-  
-  // 创建飞行克隆
   var clone=document.createElement('div');
   clone.className='fly-card';
   clone.style.left=cr.left+'px';clone.style.top=cr.top+'px';
   clone.style.width=cr.width+'px';clone.style.height=cr.height+'px';
   clone.innerHTML='<img src="card_back.webp" alt="">';
   document.body.appendChild(clone);
-  
-  // 原牌变暗
   el.style.opacity='0.3';
-  
-  // 触发飞行动画
   requestAnimationFrame(function(){
     requestAnimationFrame(function(){
       clone.style.left=sr.left+'px';clone.style.top=sr.top+'px';
@@ -377,60 +370,57 @@ function fillSlot(i,el){
       clone.classList.add('fly-land');
     });
   });
-  
-  // 动画完成后填充槽位
-  var self=this;
   setTimeout(function(){
     spreadSlots[idx]=spreadDeck[i];usedIndices.add(i);
     renderSpreadSlots();renderSpreadTable();
-    document.body.removeChild(clone);el._flying=false;
-    if(spreadSlots.every(function(s){return s})){
-      bid('spreadHint').textContent='✨ 全部填充完毕，点击翻开牌阵！';
+    if(clone.parentNode)document.body.removeChild(clone);el._flying=false;
+    if(spreadSlots.every(function(s){return s&&!s._reserved})){
+      bid('spreadHint').textContent='已全部填充，点击翻开牌阵！';
       bid('spreadRevealBtn').style.animation='pulse 1.5s infinite';
     }else{
-      bid('spreadHint').textContent='已填充 '+spreadSlots.filter(function(s){return s}).length+'/'+spreadSlots.length+' 个位置';
+      bid('spreadHint').textContent='已填充 '+spreadSlots.filter(function(s){return s&&!s._reserved}).length+'/'+spreadSlots.length+' 个位置';
     }
   },460);
 }
 function cancelSlot(i){if(spreadSlots[i]){let idx=spreadDeck.indexOf(spreadSlots[i]);if(idx>=0)usedIndices.delete(idx);spreadSlots[i]=null;renderSpreadSlots();renderSpreadTable();bid('spreadHint').textContent='点击下方牌桌填充空位';bid('spreadRevealBtn').style.animation=''}}
 function shuffleSpreadDeck(){
-  var cards=document.querySelectorAll('#spreadTable .card');
-  if(cards.length===0){buildSpreadDeck();usedIndices.clear();spreadSlots=new Array(SPREADS[spreadIdx].cards).fill(null);renderSpreadSlots();renderSpreadTable();return}
+  var tableCards=document.querySelectorAll('#spreadTable .card');
+  var slotCards=document.querySelectorAll('#spreadGrid .slot-card.filled');
+  var allCards=[];tableCards.forEach(function(c){allCards.push(c)});slotCards.forEach(function(c){allCards.push(c)});
+  if(allCards.length===0){buildSpreadDeck();usedIndices.clear();spreadSlots=new Array(SPREADS[spreadIdx].cards).fill(null);renderSpreadSlots();renderSpreadTable();return}
   var ta=document.querySelectorAll('.table-area')[1],pg=document.querySelector('.app');
   if(ta)ta.classList.add('shuffle-open');if(pg)pg.style.overflow='visible';
-  cards.forEach(function(c,i){
-    c.classList.remove('dealing','lifting','shuffling','shuffle-phase');
-    void c.offsetWidth;
+  allCards.forEach(function(c,i){
+    c.classList.remove('dealing','lifting','shuffling','shuffle-phase');void c.offsetWidth;
   });
-  // Phase 1: 重叠聚拢 —— 全部飞向同一中心点，紧密堆叠
-  cards.forEach(function(c,i){
-    c.style.setProperty('--zi',i);
-    c.style.setProperty('--gx',((i-cards.length/2)*0.25)+'px');
-    c.style.setProperty('--sr',((Math.random()-.5)*35)+'deg');
+  allCards.forEach(function(c,i){
+    c.style.setProperty('--gx',((i-allCards.length/2)*2)+'px');
+    c.style.setProperty('--sx',((Math.random()-.5)*120)+'px');
+    c.style.setProperty('--sr',((Math.random()-.5)*50)+'deg');
     c.classList.add('shuffle-phase','lifting');
   });
-  // Phase 2: 叠在一起打乱
   setTimeout(function(){
-    cards.forEach(function(c,i){
+    allCards.forEach(function(c,i){
       c.classList.remove('lifting');c.classList.add('shuffling');
-      c.style.animationDelay=(i%5)*25+'ms';
+      c.style.animationDelay=(i%8)*15+'ms';
     });
   },400);
-  // Phase 3: 散回桌面
   setTimeout(function(){
-    buildSpreadDeck();usedIndices.clear();spreadSlots=new Array(SPREADS[spreadIdx].cards).fill(null);
+    allCards.forEach(function(c){if(c.parentNode)c.parentNode.removeChild(c)});
+    buildSpreadDeck();usedIndices.clear();
+    spreadSlots=new Array(SPREADS[spreadIdx].cards).fill(null);
     renderSpreadSlots();renderSpreadTable(true);
     if(ta)ta.classList.remove('shuffle-open');if(pg)pg.style.overflow='';
     setTimeout(function(){
       document.querySelectorAll('#spreadTable .card').forEach(function(c){c.classList.remove('dealing')});
     },1200);
-  },950)
+  },980)
 }
 const sw2=bid('spreadTableWrap');if(sw2)sw2.addEventListener('wheel',function(e){e.preventDefault();sw2.scrollBy({left:e.deltaY||e.deltaX,behavior:'smooth'})},{passive:false});
 function shiftSpreadTable(d){let w=bid('spreadTableWrap');if(w)w.scrollBy({left:d,behavior:'smooth'})}
 
 // === P4 Grid翻牌 ===
-function goSpreadReveal(){if(!spreadSlots.every(s=>s)){bid('spreadHint').textContent='请先填满所有牌位！';return}let s=SPREADS[spreadIdx],g=bid('spreadRevealGrid');g.className='spread-reveal-grid '+s.layout;g.innerHTML='';bid('spreadRevealTitle').textContent=s.name;bid('spreadRevealSub').textContent=s.cards+' 张牌 · 点击牌背逐一翻开';let bp=[];bp.push('你是一位经验丰富的塔罗解读师。你的解读风格：用大白话讲透牌面，不讲玄学黑话；逆位不只说「不好」，而是指出心理卡点和调整方向；把多张牌串成一个连贯的故事；给出可落地的建议，不说套话。语气是朋友式深度对话，温和直白。\n\n【求问者的问题】\n'+'（求问者未填写具体问题，请根据牌阵主题“'+s.name+'”和牌面自行推断ta可能关心的方向）'+'\n\n【抽到的牌 · 牌阵：'+s.name+'】\n');spreadSlots.forEach((c,i)=>{let el=document.createElement('div');el.className='rev-card-pos'+(c.reversed?' reversed':'');if(s.pos[i].r){el.style.gridRow=s.pos[i].r;el.style.gridColumn=s.pos[i].c}if(s.pos[i].span)el.style.gridColumn='span '+s.pos[i].span;let isrc='PaiMian/'+c.en.replace(/ /g,'_')+'.webp';el.innerHTML='<div class="rev-card-inner"><div class="rev-face rev-back"><img src="card_back.webp" alt=""></div><div class="rev-face rev-front"><img src="'+isrc+'" alt="'+c.zh+'" onerror="this.parentElement.innerHTML=\'<div style=font-size:1.5rem>'+c.icon+'</div>\'"></div></div><div class="rev-label"><span class="rp-pos">'+s.pos[i].t+'：'+s.pos[i].d+'</span>'+c.icon+' '+c.zh+'<span class="rev-pos-tag '+(c.reversed?'rev':'up')+'">'+(c.reversed?'逆位':'正位')+'</span></div>';bp.push(s.pos[i].t+'（牌'+(i+1)+'）：'+c.zh+'（'+c.en+'）—— '+(c.reversed?'逆位':'正位')+',关键词：'+(c.reversed?c.rev:c.up));g.appendChild(el);el.addEventListener('click',function(){if(el.classList.contains('flipped'))return;el.classList.add('flipped');let f=document.querySelectorAll('#spreadRevealGrid .rev-card-pos.flipped').length;bid('spreadRevealSub').textContent='已翻开 '+f+'/'+spreadSlots.length+' 张';if(f===spreadSlots.length){bid('spreadRevealSub').textContent='✦ 全部揭开 ✦';bid('spreadCopyBox').style.display='flex'}})});bp.push('\n\n请按以下结构解读（注意：每张牌已标注在牌阵中的位置含义，解读时请结合该位置的角色来分析牌意）：\n\n🔮 逐张解读（每张牌包含）：\n① 画面简述（一句话描述牌上画了什么）\n② 核心含义 + 位置解读（正位代表什么 / 逆位能量被什么堵住了，并结合该牌在牌阵中的位置角色来说明）\n③ 对求问者的意义（把牌意对应到ta正在面对的真实困境上）\n\n🧩 牌阵关联分析：\n分析牌阵中牌与牌之间的逻辑关系——位置A的牌如何影响位置B的牌？有没有互相呼应的元素（宝剑/思维、圣杯/情感、权杖/行动、星币/现实）？\n\n📖 你的故事：\n把所有牌按牌阵位置串成一个连贯叙事。格式：「在'+s.name+'的牌阵中，你的______（位置1）显示出______，而______（位置2）揭示了______，最终______（总结位置）指向______……」\n\n💡 行动建议（至少3条，每条都要能从牌面中找到依据）：\n要求：不说「保持积极心态」这种空话，每条建议都要具体可执行，并说明是对应哪个牌阵位置的提示。\n\n【输出规则】\n- 每张牌必须逐张解读，不可合并跳过\n- 尽量避免宿命论表述，强调人的主观能动性\n- 用中文输出，排版清晰分段');bid('spreadCopyBtn').dataset.fullPrompt=bp.join('\n');bid('spreadCopyBox').style.display='none';goPage(4)}
+function goSpreadReveal(){if(!spreadSlots.every(s=>s)){bid('spreadHint').textContent='请先填满所有牌位！';return}let s=SPREADS[spreadIdx],g=bid('spreadRevealGrid');g.className='spread-reveal-grid '+s.layout;g.innerHTML='';bid('spreadRevealTitle').textContent=s.name;bid('spreadRevealSub').textContent=s.cards+' 张牌 · 点击牌背逐一翻开';let bp=[];bp.push('你是一位经验丰富的塔罗解读师。你的解读风格：用大白话讲透牌面，不讲玄学黑话；逆位不只说「不好」，而是指出心理卡点和调整方向；把多张牌串成一个连贯的故事；给出可落地的建议，不说套话。语气是朋友式深度对话，温和直白。\n\n【求问者的问题】\n'+'（求问者未填写具体问题，请根据牌阵主题"'+s.name+'"和牌面自行推断ta可能关心的方向）'+'\n\n【抽到的牌 · 牌阵：'+s.name+'】\n');;;spreadSlots.forEach((c,i)=>{let el=document.createElement('div');el.className='rev-card-pos'+(c.reversed?' reversed':'');if(s.pos[i].r){el.style.gridRow=s.pos[i].r;el.style.gridColumn=s.pos[i].c}if(s.pos[i].span)el.style.gridColumn='span '+s.pos[i].span;let isrc='PaiMian/'+c.en.replace(/ /g,'_')+'.webp';el.innerHTML='<div class="rev-card-inner"><div class="rev-face rev-back"><img src="card_back.webp" alt=""></div><div class="rev-face rev-front"><img src="'+isrc+'" alt="'+c.zh+'" onerror="this.parentElement.innerHTML=\'<div style=font-size:1.5rem>'+c.icon+'</div>\'"></div></div><div class="rev-label"><span class="rp-pos">'+s.pos[i].t+'：'+s.pos[i].d+'</span>'+c.icon+' '+c.zh+'<span class="rev-pos-tag '+(c.reversed?'rev':'up')+'">'+(c.reversed?'逆位':'正位')+'</span></div>';bp.push(s.pos[i].t+'（牌'+(i+1)+'）：'+c.zh+'（'+c.en+'）—— '+(c.reversed?'逆位':'正位')+',关键词：'+(c.reversed?c.rev:c.up));g.appendChild(el);el.addEventListener('click',function(){if(el.classList.contains('flipped'))return;el.classList.add('flipped');let f=document.querySelectorAll('#spreadRevealGrid .rev-card-pos.flipped').length;bid('spreadRevealSub').textContent='已翻开 '+f+'/'+spreadSlots.length+' 张';if(f===spreadSlots.length){bid('spreadRevealSub').textContent='✦ 全部揭开 ✦';bid('spreadCopyBox').style.display='flex'}})});bp.push('\n\n请按以下结构解读（注意：每张牌已标注在牌阵中的位置含义，解读时请结合该位置的角色来分析牌意）：\n\n🔮 逐张解读（每张牌包含）：\n① 画面简述（一句话描述牌上画了什么）\n② 核心含义 + 位置解读（正位代表什么 / 逆位能量被什么堵住了，并结合该牌在牌阵中的位置角色来说明）\n③ 对求问者的意义（把牌意对应到ta正在面对的真实困境上）\n\n🧩 牌阵关联分析：\n分析牌阵中牌与牌之间的逻辑关系——位置A的牌如何影响位置B的牌？有没有互相呼应的元素（宝剑/思维、圣杯/情感、权杖/行动、星币/现实）？\n\n📖 你的故事：\n把所有牌按牌阵位置串成一个连贯叙事。格式：「在'+s.name+'的牌阵中，你的______（位置1）显示出______，而______（位置2）揭示了______，最终______（总结位置）指向______……」\n\n💡 行动建议（至少3条，每条都要能从牌面中找到依据）：\n要求：不说「保持积极心态」这种空话，每条建议都要具体可执行，并说明是对应哪个牌阵位置的提示。\n\n【输出规则】\n- 每张牌必须逐张解读，不可合并跳过\n- 尽量避免宿命论表述，强调人的主观能动性\n- 用中文输出，排版清晰分段');bid('spreadCopyBtn').dataset.fullPrompt=bp.join('\n');;bid('spreadCopyBox').style.display='none';goPage(4)}
 function copySpreadResult(){let t=bid('spreadCopyBtn').dataset.fullPrompt;navigator.clipboard.writeText(t).then(function(){let b=bid('spreadCopyBtn');b.textContent='✅ 已复制！';b.classList.add('copied');setTimeout(function(){b.textContent='📋 复制解牌提示词';b.classList.remove('copied')},2500)})}
 
 buildDeck();renderTable();buildSpreadDeck();renderSpreadTable();
