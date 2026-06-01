@@ -23,7 +23,7 @@ body::before{content:none}
 }
 @keyframes cardFlyCenter {
   0%   { transform: translateY(0) translateX(0) rotate(var(--rot,0deg)) scale(1); opacity: 1; z-index:1; }
-  100% { transform: translateY(calc(-40vh)) translateX(var(--gx,0px)) rotate(0deg) scale(0.45); opacity: 0.9; z-index:10; }
+  100% { transform: translateY(calc(-15vh)) translateX(var(--gx,0px)) rotate(0deg) scale(0.45); opacity: 0.9; z-index:10; }
 }
 
 /* 阶段2：打乱 —— 在屏幕中央炸开、乱序碰撞 */
@@ -32,14 +32,14 @@ body::before{content:none}
   z-index: 10;
 }
 @keyframes cardScramble {
-  0%   { transform: translateY(calc(-40vh)) translateX(var(--gx,0px)) rotate(0deg) scale(0.45); }
-  15%  { transform: translateY(calc(-48vh)) translateX(calc(var(--gx,0px) + var(--sx,60px))) rotate(var(--sr,25deg)) scale(0.38); }
-  30%  { transform: translateY(calc(-30vh)) translateX(calc(var(--gx,0px) - var(--sx,40px))) rotate(calc(var(--sr,20deg) * -1)) scale(0.5); }
-  45%  { transform: translateY(calc(-45vh)) translateX(calc(var(--gx,0px) + var(--sx,20px))) rotate(var(--sr,10deg)) scale(0.42); }
-  60%  { transform: translateY(calc(-35vh)) translateX(calc(var(--gx,0px) - var(--sx,50px))) rotate(calc(var(--sr,15deg) * -1)) scale(0.48); }
-  75%  { transform: translateY(calc(-42vh)) translateX(var(--gx,0px)) rotate(0deg) scale(0.45); }
-  90%  { transform: translateY(calc(-38vh)) translateX(calc(var(--gx,0px) + var(--sx,30px))) rotate(var(--sr,12deg)) scale(0.43); }
-  100% { transform: translateY(calc(-40vh)) translateX(var(--gx,0px)) rotate(0deg) scale(0.45); opacity: 0.6; }
+  0%   { transform: translateY(calc(-15vh)) translateX(var(--gx,0px)) rotate(0deg) scale(0.45); }
+  15%  { transform: translateY(calc(-13vh)) translateX(calc(var(--gx,0px) + var(--sx,60px))) rotate(var(--sr,25deg)) scale(0.38); }
+  30%  { transform: translateY(calc(-12vh)) translateX(calc(var(--gx,0px) - var(--sx,40px))) rotate(calc(var(--sr,20deg) * -1)) scale(0.5); }
+  45%  { transform: translateY(calc(-18vh)) translateX(calc(var(--gx,0px) + var(--sx,20px))) rotate(var(--sr,10deg)) scale(0.42); }
+  60%  { transform: translateY(calc(-13vh)) translateX(calc(var(--gx,0px) - var(--sx,50px))) rotate(calc(var(--sr,15deg) * -1)) scale(0.48); }
+  75%  { transform: translateY(calc(-16vh)) translateX(var(--gx,0px)) rotate(0deg) scale(0.45); }
+  90%  { transform: translateY(calc(-14vh)) translateX(calc(var(--gx,0px) + var(--sx,30px))) rotate(var(--sr,12deg)) scale(0.43); }
+  100% { transform: translateY(calc(-15vh)) translateX(var(--gx,0px)) rotate(0deg) scale(0.45); opacity: 0.6; }
 }
 
 /* 阶段3：散开 —— 从屏幕中央一张张弹回桌面 */
@@ -48,7 +48,7 @@ body::before{content:none}
   opacity: 0;
 }
 @keyframes cardSpread {
-  0%   { transform: translateY(calc(-30vh)) scale(0.35) rotate(var(--rot,0deg)); opacity: 0; }
+  0%   { transform: translateY(calc(-12vh)) scale(0.35) rotate(var(--rot,0deg)); opacity: 0; }
   30%  { opacity: 1; }
   60%  { transform: translateY(12px) scale(1.06) rotate(calc(var(--rot,0deg) * 0.1)); }
   78%  { transform: translateY(-4px) scale(0.96) rotate(calc(var(--rot,0deg) * 0.5)); }
@@ -81,19 +81,19 @@ body::before{content:none}
 }
 @keyframes stackGather {
   0%   { transform: translateY(0) translateX(0) rotate(var(--rot,0deg)) scale(1); opacity: 1; }
-  100% { transform: translateY(calc(-35vh)) translateX(var(--gx,0px)) rotate(0deg) scale(0.35); opacity: 0.9; }
+  100% { transform: translateY(calc(-13vh)) translateX(var(--gx,0px)) rotate(0deg) scale(0.35); opacity: 0.9; }
 }
 #spreadTable .card.shuffling {
   animation: stackScramble 0.5s ease-in-out forwards;
   z-index: var(--zi,1);
 }
 @keyframes stackScramble {
-  0%   { transform: translateY(calc(-35vh)) translateX(var(--gx,0px)) rotate(0deg) scale(0.35); }
-  18%  { transform: translateY(calc(-40vh)) translateX(calc(var(--gx,0px) + 10px)) rotate(var(--sr,15deg)) scale(0.32); }
-  36%  { transform: translateY(calc(-30vh)) translateX(calc(var(--gx,0px) - 8px)) rotate(calc(var(--sr,12deg) * -1)) scale(0.38); }
-  54%  { transform: translateY(calc(-38vh)) translateX(var(--gx,0px)) rotate(calc(var(--sr,8deg))) scale(0.33); }
+  0%   { transform: translateY(calc(-13vh)) translateX(var(--gx,0px)) rotate(0deg) scale(0.35); }
+  18%  { transform: translateY(calc(-15vh)) translateX(calc(var(--gx,0px) + 10px)) rotate(var(--sr,15deg)) scale(0.32); }
+  36%  { transform: translateY(calc(-12vh)) translateX(calc(var(--gx,0px) - 8px)) rotate(calc(var(--sr,12deg) * -1)) scale(0.38); }
+  54%  { transform: translateY(calc(-14vh)) translateX(var(--gx,0px)) rotate(calc(var(--sr,8deg))) scale(0.33); }
   72%  { transform: translateY(calc(-33vh)) translateX(calc(var(--gx,0px) + 5px)) rotate(calc(var(--sr,5deg) * -1)) scale(0.36); }
-  100% { transform: translateY(calc(-35vh)) translateX(var(--gx,0px)) rotate(0deg) scale(0.35); opacity: 0.55; }
+  100% { transform: translateY(calc(-13vh)) translateX(var(--gx,0px)) rotate(0deg) scale(0.35); opacity: 0.55; }
 }
 /* 牌桌洗牌时的遮罩提示 */
 .shuffle-overlay {
