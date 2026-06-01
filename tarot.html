@@ -365,15 +365,15 @@ var uTransparent = gl.getUniformLocation(program, 'uTransparent');
 // ---- Set static uniforms (tarot purple theme) ----
 gl.uniform2f(uFocal, 0.5, 0.5);
 gl.uniform2f(uRotation, 1.0, 0.0);
-gl.uniform1f(uDensity, 1.5);
+gl.uniform1f(uDensity, 0.5);
 gl.uniform1f(uHueShift, 230.0);      // 紫色调，匹配塔罗主题
-gl.uniform1f(uSpeed, 1.0);
-gl.uniform1f(uGlowIntensity, 0.6);   // 适中的光芒
-gl.uniform1f(uSaturation, 0.5);     // 柔和的色彩
+gl.uniform1f(uSpeed, 0.4);
+gl.uniform1f(uGlowIntensity, 0.4);   // 适中的光芒
+gl.uniform1f(uSaturation, 0.7);     // 柔和的色彩
 gl.uniform1f(uMouseRepulsion, 1.0);  // 开启鼠标排斥
 gl.uniform1f(uTwinkleIntensity, 0.2);
 gl.uniform1f(uRotationSpeed, 0.05);  // 缓慢旋转
-gl.uniform1f(uRepulsionStrength, 0.5);
+gl.uniform1f(uRepulsionStrength, 0.1);
 gl.uniform1f(uAutoCenterRepulsion, 0.0);
 gl.uniform1f(uTransparent, 1.0);     // 透明背景，让 #0a0618 透出
 
