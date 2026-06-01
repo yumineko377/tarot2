@@ -169,8 +169,8 @@ buildDeck();renderTable();buildSpreadDeck();renderSpreadTable();
 // WebGL Galaxy 星空背景 —— 基于 React Bits Galaxy 组件翻译
 (function(){
 var canvas = document.getElementById('starBg');
-var gl = canvas.getContext('webgl', { alpha: true, premultipliedAlpha: false })
-      || canvas.getContext('experimental-webgl', { alpha: true, premultipliedAlpha: false });
+var gl = canvas.getContext('webgl', { alpha: true, premultipliedAlpha: false, powerPreference: 'high-performance' })
+      || canvas.getContext('experimental-webgl', { alpha: true, premultipliedAlpha: false, powerPreference: 'high-performance' });
 if (!gl) { console.warn('WebGL not supported, falling back to simple background'); return; }
 
 gl.enable(gl.BLEND);
@@ -209,7 +209,7 @@ var fragmentShaderSrc = [
 'uniform float uAutoCenterRepulsion;',
 'uniform float uTransparent;',
 'varying vec2 vUv;',
-'#define NUM_LAYER 2.0',  // reduced from 4 for perf
+'#define NUM_LAYER 1.0',  // further reduced for mobile
 '#define STAR_COLOR_CUTOFF 0.2',
 '#define MAT45 mat2(0.7071, -0.7071, 0.7071, 0.7071)',
 '#define PERIOD 3.0',
@@ -399,8 +399,9 @@ var targetMouseActive = 0.0, smoothMouseActive = 0.0;
 
 function resize() {
   var dpr = 1.0;  // capped for performance
-  canvas.width = window.innerWidth * dpr;
-  canvas.height = window.innerHeight * dpr;
+  var scale = 0.5;  // resolution scale for mobile perf
+  canvas.width = window.innerWidth * dpr * scale;
+  canvas.height = window.innerHeight * dpr * scale;
   canvas.style.width = window.innerWidth + 'px';
   canvas.style.height = window.innerHeight + 'px';
   gl.viewport(0, 0, canvas.width, canvas.height);
@@ -419,8 +420,11 @@ document.addEventListener('mouseleave', function() {
 });
 
 // ---- Animation loop ----
+var frameSkip = 0;
 function animate(t) {
   requestAnimationFrame(animate);
+  frameSkip++;
+  if (frameSkip % 2 !== 0) return;  // skip every other frame (~30fps)
 
   var lerp = 0.05;
   smoothMouseX += (targetMouseX - smoothMouseX) * lerp;
