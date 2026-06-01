@@ -17,41 +17,41 @@ body::before{content:none}
 /* === 洗牌动画：聚拢 → 打乱 → 散开 === */
 .card.shuffle-phase { pointer-events: none; }
 
-/* 阶段1：聚拢 —— 牌从桌面升起、缩小、向中间靠拢 */
+/* 阶段1：聚拢 —— 牌飞向屏幕中央 */
 .card.lifting {
-  animation: cardLift 0.3s ease-out forwards;
+  animation: cardFlyCenter 0.4s cubic-bezier(0.4,0,0.2,1) forwards;
 }
-@keyframes cardLift {
-  0%   { transform: translateY(0) translateX(0) rotate(var(--rot,0deg)) scale(1); opacity: 1; }
-  100% { transform: translateY(-50px) translateX(var(--gx,0px)) rotate(0deg) scale(0.6); opacity: 0.85; }
+@keyframes cardFlyCenter {
+  0%   { transform: translateY(0) translateX(0) rotate(var(--rot,0deg)) scale(1); opacity: 1; z-index:1; }
+  100% { transform: translateY(calc(-40vh)) translateX(var(--gx,0px)) rotate(0deg) scale(0.45); opacity: 0.9; z-index:10; }
 }
 
-/* 阶段2：打乱 —— 快速上下颠簸，模拟洗牌 */
+/* 阶段2：打乱 —— 在屏幕中央炸开、乱序碰撞 */
 .card.shuffling {
-  animation: cardRiffle 0.45s ease-in-out forwards;
+  animation: cardScramble 0.55s ease-in-out forwards;
+  z-index: 10;
 }
-@keyframes cardRiffle {
-  0%   { transform: translateY(-50px) translateX(var(--gx,0px)) rotate(0deg) scale(0.6); }
-  12%  { transform: translateY(-80px) translateX(calc(var(--gx,0px) + 15px)) rotate(-8deg) scale(0.55); }
-  25%  { transform: translateY(-20px) translateX(calc(var(--gx,0px) - 10px)) rotate(5deg) scale(0.7); }
-  37%  { transform: translateY(-70px) translateX(calc(var(--gx,0px) - 5px)) rotate(3deg) scale(0.5); }
-  50%  { transform: translateY(-35px) translateX(calc(var(--gx,0px) + 8px)) rotate(-4deg) scale(0.65); }
-  62%  { transform: translateY(-60px) translateX(var(--gx,0px)) rotate(-2deg) scale(0.58); }
-  75%  { transform: translateY(-25px) translateX(calc(var(--gx,0px) - 12px)) rotate(6deg) scale(0.7); }
-  87%  { transform: translateY(-55px) translateX(calc(var(--gx,0px) + 5px)) rotate(-1deg) scale(0.55); }
-  100% { transform: translateY(-40px) translateX(var(--gx,0px)) rotate(0deg) scale(0.6); opacity: 0.7; }
+@keyframes cardScramble {
+  0%   { transform: translateY(calc(-40vh)) translateX(var(--gx,0px)) rotate(0deg) scale(0.45); }
+  15%  { transform: translateY(calc(-48vh)) translateX(calc(var(--gx,0px) + var(--sx,60px))) rotate(var(--sr,25deg)) scale(0.38); }
+  30%  { transform: translateY(calc(-30vh)) translateX(calc(var(--gx,0px) - var(--sx,40px))) rotate(calc(var(--sr,20deg) * -1)) scale(0.5); }
+  45%  { transform: translateY(calc(-45vh)) translateX(calc(var(--gx,0px) + var(--sx,20px))) rotate(var(--sr,10deg)) scale(0.42); }
+  60%  { transform: translateY(calc(-35vh)) translateX(calc(var(--gx,0px) - var(--sx,50px))) rotate(calc(var(--sr,15deg) * -1)) scale(0.48); }
+  75%  { transform: translateY(calc(-42vh)) translateX(var(--gx,0px)) rotate(0deg) scale(0.45); }
+  90%  { transform: translateY(calc(-38vh)) translateX(calc(var(--gx,0px) + var(--sx,30px))) rotate(var(--sr,12deg)) scale(0.43); }
+  100% { transform: translateY(calc(-40vh)) translateX(var(--gx,0px)) rotate(0deg) scale(0.45); opacity: 0.6; }
 }
 
-/* 阶段3：散开 —— 一张张落回桌面 */
+/* 阶段3：散开 —— 从屏幕中央一张张弹回桌面 */
 .card.dealing {
-  animation: cardSpread 0.5s cubic-bezier(0.34,1.56,0.64,1) forwards;
+  animation: cardSpread 0.55s cubic-bezier(0.34,1.56,0.64,1) forwards;
   opacity: 0;
 }
 @keyframes cardSpread {
-  0%   { transform: translateY(-100px) scale(0.4) rotate(var(--rot,0deg)); opacity: 0; }
-  35%  { opacity: 1; }
-  65%  { transform: translateY(10px) scale(1.05) rotate(calc(var(--rot,0deg) * 0.15)); }
-  80%  { transform: translateY(-3px) scale(0.97) rotate(calc(var(--rot,0deg) * 0.5)); }
+  0%   { transform: translateY(calc(-30vh)) scale(0.35) rotate(var(--rot,0deg)); opacity: 0; }
+  30%  { opacity: 1; }
+  60%  { transform: translateY(12px) scale(1.06) rotate(calc(var(--rot,0deg) * 0.1)); }
+  78%  { transform: translateY(-4px) scale(0.96) rotate(calc(var(--rot,0deg) * 0.5)); }
   100% { transform: translateY(0) scale(1) rotate(var(--rot,0deg)); opacity: 1; }
 }
 
@@ -69,6 +69,10 @@ body::before{content:none}
 .fly-card img {
   width: 100%; height: 100%; object-fit: cover; border-radius: 8px;
 }
+
+/* 洗牌时允许牌飞出容器 */
+.table-area.shuffle-open,.page.shuffle-open{overflow:visible!important}
+.table-area.shuffle-open .table-wrap{overflow:visible!important}
 /* 牌桌洗牌时的遮罩提示 */
 .shuffle-overlay {
   position: fixed; inset: 0; z-index: 5; pointer-events: none;
@@ -265,34 +269,40 @@ function updateCount(){bid('count').textContent='已选 '+selectedCards.size+'/'
 function shuffleDeck(){
   var cards=document.querySelectorAll('#table .card');
   if(cards.length===0){buildDeck();renderTable();updateCount();return}
+  // 打开overflow，允许牌飞出容器
+  var ta=document.querySelector('.table-area'),pg=document.querySelector('#selectPage');
+  if(ta)ta.classList.add('shuffle-open');if(pg)pg.classList.add('shuffle-open');
   // 清除上次动画残留
   cards.forEach(function(c,i){
     c.classList.remove('dealing','lifting','shuffling','shuffle-phase');
-    void c.offsetWidth; // 强制回流，确保动画重新触发
+    void c.offsetWidth;
   });
-  // Phase 1: 聚拢
+  // Phase 1: 聚拢 —— 飞向屏幕中央
   cards.forEach(function(c,i){
-    c.style.setProperty('--gx',((i-cards.length/2)*1.5)+'px');
+    c.style.setProperty('--gx',((i-cards.length/2)*2)+'px');
+    c.style.setProperty('--sx',((Math.random()-.5)*120)+'px');
+    c.style.setProperty('--sr',((Math.random()-.5)*50)+'deg');
     c.classList.add('shuffle-phase','lifting');
   });
-  // Phase 2: 打乱
+  // Phase 2: 打乱 —— 中央炸开乱序碰撞
   setTimeout(function(){
     cards.forEach(function(c,i){
       c.classList.remove('lifting');
       c.classList.add('shuffling');
-      c.style.animationDelay=(i%8)*15+'ms';
+      c.style.animationDelay=(i%6)*20+'ms';
     });
-  },300);
-  // Phase 3: 散开
+  },400);
+  // Phase 3: 散开 + 新牌
   var ov=bid('shuffleOverlay');if(ov)ov.classList.add('active');
   setTimeout(function(){
     buildDeck();renderTable(true);updateCount();
     bid('revealBtn').style.animation='';if(ov)ov.classList.remove('active');
-    // 等所有牌落完后清掉 dealing 类，确保下次洗牌动画正常
+    // 恢复overflow
+    if(ta)ta.classList.remove('shuffle-open');if(pg)pg.classList.remove('shuffle-open');
     setTimeout(function(){
       document.querySelectorAll('#table .card').forEach(function(c){c.classList.remove('dealing')});
     },1200);
-  },780)
+  },980)
 }
 const wrap=bid('tableWrap');wrap.addEventListener('wheel',function(e){e.preventDefault();wrap.scrollBy({left:e.deltaY||e.deltaX,behavior:'smooth'})},{passive:false});
 function shiftTable(d){bid('tableWrap').scrollBy({left:d,behavior:'smooth'})}
@@ -364,32 +374,33 @@ function cancelSlot(i){if(spreadSlots[i]){let idx=spreadDeck.indexOf(spreadSlots
 function shuffleSpreadDeck(){
   var cards=document.querySelectorAll('#spreadTable .card');
   if(cards.length===0){buildSpreadDeck();usedIndices.clear();spreadSlots=new Array(SPREADS[spreadIdx].cards).fill(null);renderSpreadSlots();renderSpreadTable();return}
-  // 清除动画残留
+  // 打开overflow
+  var ta=document.querySelectorAll('.table-area')[1],pg=document.querySelector('.app');
+  if(ta)ta.classList.add('shuffle-open');if(pg)pg.style.overflow='visible';
   cards.forEach(function(c,i){
     c.classList.remove('dealing','lifting','shuffling','shuffle-phase');
     void c.offsetWidth;
   });
-  // Phase 1: 聚拢
   cards.forEach(function(c,i){
-    c.style.setProperty('--gx',((i-cards.length/2)*1.5)+'px');
+    c.style.setProperty('--gx',((i-cards.length/2)*2)+'px');
+    c.style.setProperty('--sx',((Math.random()-.5)*120)+'px');
+    c.style.setProperty('--sr',((Math.random()-.5)*50)+'deg');
     c.classList.add('shuffle-phase','lifting');
   });
-  // Phase 2: 打乱
   setTimeout(function(){
     cards.forEach(function(c,i){
-      c.classList.remove('lifting');
-      c.classList.add('shuffling');
-      c.style.animationDelay=(i%8)*15+'ms';
+      c.classList.remove('lifting');c.classList.add('shuffling');
+      c.style.animationDelay=(i%6)*20+'ms';
     });
-  },300);
-  // Phase 3: 散开
+  },400);
   setTimeout(function(){
     buildSpreadDeck();usedIndices.clear();spreadSlots=new Array(SPREADS[spreadIdx].cards).fill(null);
     renderSpreadSlots();renderSpreadTable(true);
+    if(ta)ta.classList.remove('shuffle-open');if(pg)pg.style.overflow='';
     setTimeout(function(){
       document.querySelectorAll('#spreadTable .card').forEach(function(c){c.classList.remove('dealing')});
     },1200);
-  },780)
+  },980)
 }
 const sw2=bid('spreadTableWrap');if(sw2)sw2.addEventListener('wheel',function(e){e.preventDefault();sw2.scrollBy({left:e.deltaY||e.deltaX,behavior:'smooth'})},{passive:false});
 function shiftSpreadTable(d){let w=bid('spreadTableWrap');if(w)w.scrollBy({left:d,behavior:'smooth'})}
