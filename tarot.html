@@ -14,6 +14,80 @@ body::before{content:none}
 .arrow{position:absolute;top:50%;transform:translateY(-50%);z-index:10;width:32px;height:32px;border-radius:50%;background:rgba(20,10,40,0.85);border:1.5px solid rgba(200,160,240,0.3);color:#c8b8e0;font-size:.9rem;cursor:pointer;display:flex;align-items:center;justify-content:center;opacity:.75;transition:all .2s}.arrow:hover{opacity:1}.arrow-left{left:2px}.arrow-right{right:2px}
 .table{display:flex;gap:0;align-items:center;padding:10px 36px 0;min-width:max-content}
 .card{width:110px;height:187px;flex-shrink:0;position:relative;margin-left:-16px;cursor:pointer;transition:transform .35s cubic-bezier(0.34,1.56,0.64,1)}.card:first-child{margin-left:0}.card.selected{transform:translateY(-22px) scale(1.08);z-index:10}.card.selected .card-inner{box-shadow:0 0 24px rgba(200,160,240,0.5)}.card.used{opacity:.35;pointer-events:none;transform:rotate(0)!important}
+/* === 洗牌动画：聚拢 → 打乱 → 散开 === */
+.card.shuffle-phase { pointer-events: none; }
+
+/* 阶段1：聚拢 —— 牌从桌面升起、缩小、向中间靠拢 */
+.card.lifting {
+  animation: cardLift 0.3s ease-out forwards;
+}
+@keyframes cardLift {
+  0%   { transform: translateY(0) translateX(0) rotate(var(--rot,0deg)) scale(1); opacity: 1; }
+  100% { transform: translateY(-50px) translateX(var(--gx,0px)) rotate(0deg) scale(0.6); opacity: 0.85; }
+}
+
+/* 阶段2：打乱 —— 快速上下颠簸，模拟洗牌 */
+.card.shuffling {
+  animation: cardRiffle 0.45s ease-in-out forwards;
+}
+@keyframes cardRiffle {
+  0%   { transform: translateY(-50px) translateX(var(--gx,0px)) rotate(0deg) scale(0.6); }
+  12%  { transform: translateY(-80px) translateX(calc(var(--gx,0px) + 15px)) rotate(-8deg) scale(0.55); }
+  25%  { transform: translateY(-20px) translateX(calc(var(--gx,0px) - 10px)) rotate(5deg) scale(0.7); }
+  37%  { transform: translateY(-70px) translateX(calc(var(--gx,0px) - 5px)) rotate(3deg) scale(0.5); }
+  50%  { transform: translateY(-35px) translateX(calc(var(--gx,0px) + 8px)) rotate(-4deg) scale(0.65); }
+  62%  { transform: translateY(-60px) translateX(var(--gx,0px)) rotate(-2deg) scale(0.58); }
+  75%  { transform: translateY(-25px) translateX(calc(var(--gx,0px) - 12px)) rotate(6deg) scale(0.7); }
+  87%  { transform: translateY(-55px) translateX(calc(var(--gx,0px) + 5px)) rotate(-1deg) scale(0.55); }
+  100% { transform: translateY(-40px) translateX(var(--gx,0px)) rotate(0deg) scale(0.6); opacity: 0.7; }
+}
+
+/* 阶段3：散开 —— 一张张落回桌面 */
+.card.dealing {
+  animation: cardSpread 0.5s cubic-bezier(0.34,1.56,0.64,1) forwards;
+  opacity: 0;
+}
+@keyframes cardSpread {
+  0%   { transform: translateY(-100px) scale(0.4) rotate(var(--rot,0deg)); opacity: 0; }
+  35%  { opacity: 1; }
+  65%  { transform: translateY(10px) scale(1.05) rotate(calc(var(--rot,0deg) * 0.15)); }
+  80%  { transform: translateY(-3px) scale(0.97) rotate(calc(var(--rot,0deg) * 0.5)); }
+  100% { transform: translateY(0) scale(1) rotate(var(--rot,0deg)); opacity: 1; }
+}
+
+
+/* === 牌阵选牌飞入动画 === */
+.fly-card {
+  position: fixed; z-index: 100; pointer-events: none;
+  transition: all 0.45s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  border-radius: 10px; overflow: hidden;
+  box-shadow: 0 0 40px rgba(200,160,240,0.9), 0 0 80px rgba(180,140,240,0.5);
+}
+.fly-card.fly-land {
+  box-shadow: 0 0 14px rgba(160,120,220,0.25);
+}
+.fly-card img {
+  width: 100%; height: 100%; object-fit: cover; border-radius: 8px;
+}
+/* 牌桌洗牌时的遮罩提示 */
+.shuffle-overlay {
+  position: fixed; inset: 0; z-index: 5; pointer-events: none;
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0; transition: opacity 0.2s;
+}
+.shuffle-overlay.active {
+  opacity: 1;
+}
+.shuffle-text {
+  font-family: 'Cinzel', serif; font-size: 1.5rem; color: #d4bff0;
+  text-shadow: 0 0 30px rgba(200,160,240,0.5);
+  animation: shufflePulse 0.6s ease-in-out infinite;
+}
+@keyframes shufflePulse {
+  0%, 100% { transform: scale(1); opacity: 0.7; }
+  50% { transform: scale(1.15); opacity: 1; }
+}
+
 .card-num{position:absolute;top:-22px;left:50%;transform:translateX(-50%);font-size:.6rem;color:#8b6faf;font-weight:600;background:rgba(15,8,30,0.8);padding:1px 6px;border-radius:99px;border:1px solid rgba(180,140,220,0.15);z-index:3;pointer-events:none}
 .card-inner{position:relative;width:100%;height:100%;border-radius:10px;overflow:hidden;box-shadow:0 4px 14px rgba(0,0,0,0.35)}.card-back{width:100%;height:100%;background:linear-gradient(135deg,#1a1040,#2a1850);border:2px solid rgba(200,160,240,0.2);display:flex;align-items:center;justify-content:center;border-radius:10px}.card-back img{width:100%;height:100%;object-fit:cover;border-radius:8px}
 .hint{font-size:.72rem;color:#6b4f8a;text-align:center;margin:4px 0}.meditation-hint{font-size:.78rem;color:#c8b0e8;text-align:center;margin-bottom:8px;opacity:.9}
@@ -43,6 +117,40 @@ body::before{content:none}
 .reveal-page{padding-top:12px;overflow-y:auto;overflow-x:hidden}.reveal-page h2{font-family:'Cinzel',serif;font-size:1.2rem;color:#d4bff0;margin-bottom:2px}.rev-sub{font-size:.68rem;color:#6b4f8a;margin-bottom:8px}
 .reveal-grid{display:flex;gap:22px;flex-wrap:wrap;justify-content:center;padding:0 16px;margin-bottom:8px}
 .rev-card{display:flex;flex-direction:column;align-items:center;gap:6px;width:140px}.rev-card-inner{width:135px;height:230px;position:relative;transition:transform .75s cubic-bezier(0.4,0,0.2,1);transform-style:preserve-3d;border-radius:14px}.rev-card.flipped .rev-card-inner{transform:rotateY(180deg)}.rev-face{position:absolute;inset:0;backface-visibility:hidden;border-radius:14px;overflow:hidden}.rev-back{background:linear-gradient(135deg,#1a1040,#2a1850);border:2px solid rgba(200,160,240,0.25);display:flex;align-items:center;justify-content:center;box-shadow:0 8px 18px rgba(0,0,0,0.35)}.rev-back img{width:100%;height:100%;object-fit:cover;border-radius:12px}.rev-front{background:linear-gradient(180deg,#faf5ef,#f0e8d8);border:2px solid rgba(180,140,100,0.3);transform:rotateY(180deg);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px 6px;text-align:center;box-shadow:0 8px 18px rgba(0,0,0,0.35)}.rev-front img{width:100%;height:100%;object-fit:cover;border-radius:12px;position:absolute;inset:0}.rev-card.reversed .rev-front img{transform:rotate(180deg)}
+/* === 翻牌光效 === */
+.rev-card,.rev-card-pos {
+  position: relative;
+}
+.rev-card::after,.rev-card-pos::after {
+  content: '';
+  position: absolute;
+  inset: -8px;
+  border-radius: 18px;
+  background: radial-gradient(ellipse, rgba(220,180,255,0.5) 0%, rgba(180,140,240,0.2) 40%, transparent 70%);
+  opacity: 0;
+  pointer-events: none;
+  z-index: 5;
+}
+.rev-card.flipped::after,.rev-card-pos.flipped::after {
+  animation: flipGlow 1s ease-out forwards;
+}
+@keyframes flipGlow {
+  0%   { opacity: 0; transform: scale(0.7); }
+  25%  { opacity: 1; transform: scale(1.25); }
+  50%  { opacity: 0.8; transform: scale(1.1); }
+  100% { opacity: 0; transform: scale(1.0); }
+}
+
+/* 光扫过牌面的效果 */
+.rev-card.flipped .rev-card-inner,.rev-card-pos.flipped .rev-card-inner {
+  animation: cardShimmer 0.75s ease-out;
+}
+@keyframes cardShimmer {
+  0%   { box-shadow: 0 8px 18px rgba(0,0,0,0.35), 0 0 0 rgba(220,180,255,0); }
+  30%  { box-shadow: 0 8px 18px rgba(0,0,0,0.35), 0 0 50px rgba(220,180,255,0.8), 0 0 100px rgba(180,140,240,0.4); }
+  100% { box-shadow: 0 8px 18px rgba(0,0,0,0.35), 0 0 0 rgba(220,180,255,0); }
+}
+
 .rev-label{text-align:center;font-size:.72rem;font-weight:700;color:#d8c8f0;margin-top:2px;opacity:0;transition:opacity .35s}.rev-card.flipped .rev-label{opacity:1}.rev-label .rev-pos-tag{font-size:.6rem;margin-left:3px;padding:2px 6px;border-radius:99px}.rev-pos-tag.up{background:rgba(100,180,140,0.18);color:#6ab88a}.rev-pos-tag.rev{background:rgba(200,120,120,0.18);color:#c08080}
 /* 牌阵翻牌Grid */
 .spread-reveal-grid{display:grid;gap:16px;justify-content:center;align-items:start;padding:8px}
@@ -74,6 +182,7 @@ body::before{content:none}
 }
 </style></head><body>
 <canvas id="starBg"></canvas>
+<div class="shuffle-overlay" id="shuffleOverlay"><div class="shuffle-text">✦ Shuffling ✦</div></div>
 <div class="app p0" id="app">
 <!-- P0 -->
 <div class="page" id="selectPage"><div class="hero"><h1>✦ Tarot ✦</h1><div class="sub">韦特系塔罗牌</div><div class="by">by LD</div></div><div class="top-bar"><button class="active" data-n="1">抽1张</button><button data-n="3">抽3张</button><button data-n="5">抽5张</button><div class="count" id="count">已选 0 张</div></div><div class="hint" id="hint">🃏 滑动牌桌 → 点击选牌 → 翻开</div><div class="meditation-hint">✦ 抽牌时请静心默念心中所问，凭直觉选择与你共鸣的牌 ✦</div><div class="table-area"><div class="arrow arrow-left" onclick="shiftTable(-250)">◀</div><div class="arrow arrow-right" onclick="shiftTable(250)">▶</div><div class="table-wrap" id="tableWrap"><div class="table" id="table"></div></div></div><div class="bottom-bar"><button class="btn" onclick="shuffleDeck()">🔮 重新洗牌</button><button class="btn accent" onclick="goReveal()" id="revealBtn">✨ 翻开</button><button class="btn" onclick="goSpreads()">📐 牌阵</button></div></div>
@@ -149,11 +258,42 @@ function bid(id){return document.getElementById(id)}
 
 // === P0 ===
 function buildDeck(){deck=shuf(A).map(c=>({...c,reversed:Math.random()<.5}));selectedCards.clear();updateCount();bid('hint').textContent='🃏 滑动牌桌 → 点击选牌 → 翻开'}
-function renderTable(){
-  let t=bid('table');t.innerHTML='';deck.forEach((c,i)=>{let d=document.createElement('div');d.className='card';d.style.transform='rotate('+((Math.random()-.5)*5)+'deg)';d.innerHTML='<div class="card-num">'+(i+1)+'</div><div class="card-inner"><div class="card-back"><img src="card_back.png" alt=""></div></div>';d.addEventListener('click',function(e){e.stopPropagation();toggleCard(i,d)});t.appendChild(d)});bid('tableWrap').scrollLeft=0}
+function renderTable(animate){
+  let t=bid('table');t.innerHTML='';deck.forEach((c,i)=>{let d=document.createElement('div');d.className='card';var rot=((Math.random()-.5)*5);d.style.setProperty('--rot',rot+'deg');d.style.transform='rotate('+rot+'deg)';if(animate){d.classList.add('dealing');d.style.animationDelay=(i*8)+'ms'};d.innerHTML='<div class="card-num">'+(i+1)+'</div><div class="card-inner"><div class="card-back"><img src="card_back.png" alt=""></div></div>';d.addEventListener('click',function(e){e.stopPropagation();toggleCard(i,d)});t.appendChild(d)});bid('tableWrap').scrollLeft=0}
 function toggleCard(i,el){if(selectedCards.has(i)){selectedCards.delete(i);el.classList.remove('selected')}else{if(selectedCards.size>=drawCount){let f=selectedCards.values().next().value;selectedCards.delete(f);document.querySelectorAll('#table .card')[f].classList.remove('selected')}selectedCards.add(i);el.classList.add('selected')}updateCount();let h=bid('hint'),btn=bid('revealBtn');if(selectedCards.size===drawCount){h.textContent='✨ 已选满，点击翻开';btn.style.animation='pulse 1.5s infinite'}else{h.textContent='🃏 已选 '+selectedCards.size+'/'+drawCount+' 张';btn.style.animation=''}}
 function updateCount(){bid('count').textContent='已选 '+selectedCards.size+'/'+drawCount+' 张'}
-function shuffleDeck(){buildDeck();renderTable();updateCount();bid('revealBtn').style.animation=''}
+function shuffleDeck(){
+  var cards=document.querySelectorAll('#table .card');
+  if(cards.length===0){buildDeck();renderTable();updateCount();return}
+  // 清除上次动画残留
+  cards.forEach(function(c,i){
+    c.classList.remove('dealing','lifting','shuffling','shuffle-phase');
+    void c.offsetWidth; // 强制回流，确保动画重新触发
+  });
+  // Phase 1: 聚拢
+  cards.forEach(function(c,i){
+    c.style.setProperty('--gx',((i-cards.length/2)*1.5)+'px');
+    c.classList.add('shuffle-phase','lifting');
+  });
+  // Phase 2: 打乱
+  setTimeout(function(){
+    cards.forEach(function(c,i){
+      c.classList.remove('lifting');
+      c.classList.add('shuffling');
+      c.style.animationDelay=(i%8)*15+'ms';
+    });
+  },300);
+  // Phase 3: 散开
+  var ov=bid('shuffleOverlay');if(ov)ov.classList.add('active');
+  setTimeout(function(){
+    buildDeck();renderTable(true);updateCount();
+    bid('revealBtn').style.animation='';if(ov)ov.classList.remove('active');
+    // 等所有牌落完后清掉 dealing 类，确保下次洗牌动画正常
+    setTimeout(function(){
+      document.querySelectorAll('#table .card').forEach(function(c){c.classList.remove('dealing')});
+    },1200);
+  },780)
+}
 const wrap=bid('tableWrap');wrap.addEventListener('wheel',function(e){e.preventDefault();wrap.scrollBy({left:e.deltaY||e.deltaX,behavior:'smooth'})},{passive:false});
 function shiftTable(d){bid('tableWrap').scrollBy({left:d,behavior:'smooth'})}
 document.querySelectorAll('#selectPage .top-bar button[data-n]').forEach(b=>{b.addEventListener('click',function(){document.querySelectorAll('#selectPage .top-bar button[data-n]').forEach(x=>x.classList.remove('active'));this.classList.add('active');drawCount=parseInt(this.dataset.n);shuffleDeck()})});
@@ -174,10 +314,83 @@ function renderSpreadSlots(){
   s.pos.forEach((p,i)=>{let el=document.createElement('div');el.className='spread-slot';if(p.r){el.style.gridRow=p.r;el.style.gridColumn=p.c}if(p.span)el.style.gridColumn='span '+p.span;let filled=!!spreadSlots[i];el.innerHTML='<div class="slot-card'+(filled?' filled':'')+'" id="slot'+i+'" onclick="cancelSlot('+i+')">'+(filled?'<img src="card_back.png" alt=""><div class="slot-num" style="position:absolute">'+(i+1)+'</div>':'<div class="slot-num">'+(i+1)+'</div>')+'</div><div class="slot-label"><span class="slot-title">'+p.t+'</span><span class="slot-desc">'+(p.d||'')+'</span></div>';g.appendChild(el)})
 }
 function buildSpreadDeck(){spreadDeck=shuf(A).map(c=>({...c,reversed:Math.random()<.5}))}
-function renderSpreadTable(){let t=bid('spreadTable');t.innerHTML='';spreadDeck.forEach((c,i)=>{let d=document.createElement('div');d.className='card';if(usedIndices.has(i))d.classList.add('used');d.style.transform='rotate('+((Math.random()-.5)*5)+'deg)';d.innerHTML='<div class="card-num">'+(i+1)+'</div><div class="card-inner"><div class="card-back"><img src="card_back.png" alt=""></div></div>';d.addEventListener('click',function(e){e.stopPropagation();fillSlot(i,d)});t.appendChild(d)});let sw=bid('spreadTableWrap');if(sw)sw.scrollLeft=0}
-function fillSlot(i,el){if(usedIndices.has(i))return;if(spreadSlots.every(s=>s))return;let idx=spreadSlots.indexOf(null);if(idx===-1)return;spreadSlots[idx]=spreadDeck[i];usedIndices.add(i);renderSpreadSlots();renderSpreadTable();if(spreadSlots.every(s=>s)){bid('spreadHint').textContent='✨ 全部填充完毕，点击翻开牌阵！';bid('spreadRevealBtn').style.animation='pulse 1.5s infinite'}else{bid('spreadHint').textContent='已填充 '+spreadSlots.filter(s=>s).length+'/'+spreadSlots.length+' 个位置'}}
+function renderSpreadTable(animate){let t=bid('spreadTable');t.innerHTML='';spreadDeck.forEach((c,i)=>{let d=document.createElement('div');d.className='card';if(usedIndices.has(i))d.classList.add('used');var rot=((Math.random()-.5)*5);d.style.setProperty('--rot',rot+'deg');d.style.transform='rotate('+rot+'deg)';if(animate){d.classList.add('dealing');d.style.animationDelay=(i*8)+'ms'};d.innerHTML='<div class="card-num">'+(i+1)+'</div><div class="card-inner"><div class="card-back"><img src="card_back.png" alt=""></div></div>';d.addEventListener('click',function(e){e.stopPropagation();fillSlot(i,d)});t.appendChild(d)});let sw=bid('spreadTableWrap');if(sw)sw.scrollLeft=0}
+function fillSlot(i,el){
+  if(usedIndices.has(i)||spreadSlots.every(function(s){return s}))return;
+  var idx=spreadSlots.indexOf(null);if(idx===-1)return;
+  if(el._flying)return;el._flying=true;
+  
+  // 获取卡牌和槽位位置
+  var cr=el.getBoundingClientRect();
+  var slot=bid('slot'+idx);
+  if(!slot){spreadSlots[idx]=spreadDeck[i];usedIndices.add(i);renderSpreadSlots();renderSpreadTable();return}
+  var sr=slot.getBoundingClientRect();
+  
+  // 创建飞行克隆
+  var clone=document.createElement('div');
+  clone.className='fly-card';
+  clone.style.left=cr.left+'px';clone.style.top=cr.top+'px';
+  clone.style.width=cr.width+'px';clone.style.height=cr.height+'px';
+  clone.innerHTML='<img src="card_back.png" alt="">';
+  document.body.appendChild(clone);
+  
+  // 原牌变暗
+  el.style.opacity='0.3';
+  
+  // 触发飞行动画
+  requestAnimationFrame(function(){
+    requestAnimationFrame(function(){
+      clone.style.left=sr.left+'px';clone.style.top=sr.top+'px';
+      clone.style.width=sr.width+'px';clone.style.height=sr.height+'px';
+      clone.classList.add('fly-land');
+    });
+  });
+  
+  // 动画完成后填充槽位
+  var self=this;
+  setTimeout(function(){
+    spreadSlots[idx]=spreadDeck[i];usedIndices.add(i);
+    renderSpreadSlots();renderSpreadTable();
+    document.body.removeChild(clone);el._flying=false;
+    if(spreadSlots.every(function(s){return s})){
+      bid('spreadHint').textContent='✨ 全部填充完毕，点击翻开牌阵！';
+      bid('spreadRevealBtn').style.animation='pulse 1.5s infinite';
+    }else{
+      bid('spreadHint').textContent='已填充 '+spreadSlots.filter(function(s){return s}).length+'/'+spreadSlots.length+' 个位置';
+    }
+  },460);
+}
 function cancelSlot(i){if(spreadSlots[i]){let idx=spreadDeck.indexOf(spreadSlots[i]);if(idx>=0)usedIndices.delete(idx);spreadSlots[i]=null;renderSpreadSlots();renderSpreadTable();bid('spreadHint').textContent='点击下方牌桌填充空位';bid('spreadRevealBtn').style.animation=''}}
-function shuffleSpreadDeck(){buildSpreadDeck();usedIndices.clear();spreadSlots=new Array(SPREADS[spreadIdx].cards).fill(null);renderSpreadSlots();renderSpreadTable();bid('spreadHint').textContent='点击下方牌桌填充空位';bid('spreadRevealBtn').style.animation=''}
+function shuffleSpreadDeck(){
+  var cards=document.querySelectorAll('#spreadTable .card');
+  if(cards.length===0){buildSpreadDeck();usedIndices.clear();spreadSlots=new Array(SPREADS[spreadIdx].cards).fill(null);renderSpreadSlots();renderSpreadTable();return}
+  // 清除动画残留
+  cards.forEach(function(c,i){
+    c.classList.remove('dealing','lifting','shuffling','shuffle-phase');
+    void c.offsetWidth;
+  });
+  // Phase 1: 聚拢
+  cards.forEach(function(c,i){
+    c.style.setProperty('--gx',((i-cards.length/2)*1.5)+'px');
+    c.classList.add('shuffle-phase','lifting');
+  });
+  // Phase 2: 打乱
+  setTimeout(function(){
+    cards.forEach(function(c,i){
+      c.classList.remove('lifting');
+      c.classList.add('shuffling');
+      c.style.animationDelay=(i%8)*15+'ms';
+    });
+  },300);
+  // Phase 3: 散开
+  setTimeout(function(){
+    buildSpreadDeck();usedIndices.clear();spreadSlots=new Array(SPREADS[spreadIdx].cards).fill(null);
+    renderSpreadSlots();renderSpreadTable(true);
+    setTimeout(function(){
+      document.querySelectorAll('#spreadTable .card').forEach(function(c){c.classList.remove('dealing')});
+    },1200);
+  },780)
+}
 const sw2=bid('spreadTableWrap');if(sw2)sw2.addEventListener('wheel',function(e){e.preventDefault();sw2.scrollBy({left:e.deltaY||e.deltaX,behavior:'smooth'})},{passive:false});
 function shiftSpreadTable(d){let w=bid('spreadTableWrap');if(w)w.scrollBy({left:d,behavior:'smooth'})}
 
